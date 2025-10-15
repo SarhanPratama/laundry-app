@@ -5,8 +5,9 @@ use App\Http\Controllers\LayananController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\PelangganController;
 use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
-    return view('menu.index');
+    return view('dashboard');
 });
 
 
