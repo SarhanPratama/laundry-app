@@ -12,25 +12,28 @@ class PackageSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('package')->insert([
+        DB::table('packages')->insert([
             [
-                'nama_paket' => 'Paket Reguler',
-                'harga' => 10000.00,
-                'waktu' => '2 Hari',
+                'nama_paket' => 'Paket Hemat',
+                'harga' => 30000.00,
+                'waktu_pengerjaan' => 1,
+                'satuan_waktu' => 'hari',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'nama_paket' => 'Paket Express',
-                'harga' => 15000.00,
-                'waktu' => '1 Hari',
+                'harga' => 50000.00,
+                'waktu_pengerjaan' => 6,
+                'satuan_waktu' => 'jam',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'nama_paket' => 'Paket Kilat',
-                'harga' => 20000.00,
-                'waktu' => '6 Jam',
+                'nama_paket' => 'Paket Super Cepat',
+                'harga' => 70000.00,
+                'waktu_pengerjaan' => 120,
+                'satuan_waktu' => 'menit',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

@@ -19,9 +19,21 @@
             </li>
 
             <li>
-                <a class="" href="{{url('layanan')}}" aria-expanded="false">
-                      <i class="fas fa-concierge-bell"></i>
+                <a class="" href="{{ url('layanan') }}" aria-expanded="false">
+                    <i class="fas fa-concierge-bell"></i>
                     <span class="nav-text">Layanan</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="{{ url('package') }}" aria-expanded="false">
+                    <i class="fas fa-box-open"></i>
+                    <span class="nav-text">Package</span>
+                </a>
+            </li>
+            <li>
+                <a class="" href="{{ url('pelanggan') }}" aria-expanded="false">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Pelanggan</span>
                 </a>
             </li>
 

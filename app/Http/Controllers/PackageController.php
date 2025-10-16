@@ -9,8 +9,8 @@ class PackageController extends Controller
 {
     public function index()
     {
-        $data = DB::table('packages')->orderBy('id', 'desc')->get();
-        return view('kategori.package', compact('data'));
+    $data = DB::table('packages')->orderBy('id', 'desc')->get();
+    return view('kategori.package', compact('data'));
     }
 
     public function store(Request $request)
@@ -18,13 +18,15 @@ class PackageController extends Controller
         $request->validate([
             'nama_paket' => 'required|string|max:100',
             'harga' => 'required|numeric|min:0',
-            'waktu' => 'required|string|max:100',
+            'waktu_pengerjaan' => 'required|integer|min:0',
+            'satuan_waktu' => 'required|in:menit,jam,hari',
         ]);
 
-        DB::table('package')->insert([
+        DB::table('packages')->insert([
             'nama_paket' => $request->nama_paket,
             'harga' => $request->harga,
-            'waktu' => $request->waktu,
+            'waktu_pengerjaan' => $request->waktu_pengerjaan,
+            'satuan_waktu' => $request->satuan_waktu,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -37,23 +39,25 @@ class PackageController extends Controller
         $request->validate([
             'nama_paket' => 'required|string|max:100',
             'harga' => 'required|numeric|min:0',
-            'waktu' => 'required|string|max:100',
+            'waktu_pengerjaan' => 'required|integer|min:0',
+            'satuan_waktu' => 'required|in:menit,jam,hari',
         ]);
 
-        DB::table('package')->where('id', $id)->update([
+        DB::table('packages')->where('id', $id)->update([
             'nama_paket' => $request->nama_paket,
             'harga' => $request->harga,
-            'waktu' => 'required|string|max:100',
+            'waktu_pengerjaan' => $request->waktu_pengerjaan,
+            'satuan_waktu' => $request->satuan_waktu,
             'updated_at' => now(),
         ]);
 
         return redirect()->back()->with('success', 'Data paket berhasil diperbarui!');
     }
 
-  public function destroy($id)
-{
-    DB::table('package')->where('id', $id)->delete();
-    return redirect()->back()->with('success', 'Data paket berhasil dihapus!');
-}
+    public function destroy($id)
+    {
+        DB::table('packages')->where('id', $id)->delete();
+        return redirect()->back()->with('success', 'Data paket berhasil dihapus!');
+    }
 
 }

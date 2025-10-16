@@ -15,9 +15,8 @@ return new class extends Migration
             $table->id(); // Kolom NO (auto increment)
             $table->string('nama_paket', 100); // Kolom NAMA PAKET
             $table->decimal('harga', 10, 2); // Kolom HARGA (misal pakai format 100000.00)
-            $table->string('waktu_pengerjaan', 50);
-            // $table->enum('status', ['aktif', 'nonaktif'])->default('aktif'); // Kolom STATUS
-            $table->string('waktu', 100);
+            $table->integer('waktu_pengerjaan');
+            $table->enum('satuan_waktu', ['menit', 'jam', 'hari']);
             $table->timestamps();
         });
     }

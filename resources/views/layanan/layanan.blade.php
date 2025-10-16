@@ -38,13 +38,13 @@
                         @endif
 
                         <div class="table-responsive">
-                            <table id="example3" class="display table table-striped table-hover" style="min-width: 845px">
-                                <thead class="table-primary">
+                            <table id="example3" class="display table table-striped table-hover">
+                                <thead>
                                     <tr>
-                                        <th class="text-center" width="5%"><strong>No.</strong></th>
-                                        <th><strong>Nama Layanan</strong></th>
-                                        <th width="20%"><strong>Harga</strong></th>
-                                        <th class="text-center" width="15%"><strong>Aksi</strong></th>
+                                        <th class="text-center">No.</th>
+                                        <th>Nama Layanan</th>
+                                        <th>Harga</th>
+                                        <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
