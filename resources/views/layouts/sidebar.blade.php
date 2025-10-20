@@ -36,6 +36,12 @@
                     <span class="nav-text">Pelanggan</span>
                 </a>
             </li>
+            <li>
+                <a class="" href="{{ url('transaksi') }}" aria-expanded="false">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Transaksi</span>
+                </a>
+            </li>
 
             {{-- <li><a class="has-arrow " href="javascript:void()" aria-expanded="false">
                     <i class="fas fa-info-circle"></i>

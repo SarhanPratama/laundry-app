@@ -107,7 +107,7 @@
     <script src="{{ asset('vendor/apexchart/apexchart.js') }}"></script>
 
     <script src="{{ asset('vendor/chart.js/Chart.bundle.min.js') }}"></script>
-
+    <script src="{{ asset('vendor/ckeditor/ckeditor.js')}}"></script>
     <!-- Datatable -->
     <script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('js/plugins-init/datatables.init.js') }}"></script>
@@ -122,8 +122,8 @@
     <script src="{{ asset('js/custom.min.js') }}"></script>
     <script src="{{ asset('js/dlabnav-init.js') }}"></script>
     <script src="{{ asset('js/demo.js') }}"></script>
-    <script src="{{ asset('js/styleSwitcher.js') }}"></script>
-    <script>
+    {{-- <script src="{{ asset('js/styleSwitcher.js') }}"></script> --}}
+    {{-- <script>
         function cardsCenter() {
 
             /*  testimonial one function by = owl.carousel.js */
@@ -164,7 +164,7 @@
                 cardsCenter();
             }, 1000);
         });
-    </script>
+    </script> --}}
 
 </body>
 

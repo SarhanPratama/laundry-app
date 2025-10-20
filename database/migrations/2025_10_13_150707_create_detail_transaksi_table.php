@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('detail_transaksi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaksi_id')->constrained('transaksi')->onDelete('cascade');
-            $table->foreignId('layanan_id')->nullable()->constrained('layanan')->onDelete('set null');
-            $table->foreignId('package_id')->nullable()->constrained('packages')->onDelete('set null');
-            $table->decimal('berat_cucian', 8, 2)->default(0); // kg
+            $table->unsignedBigInteger('item_id');
+            $table->enum('item_type', ['layanan', 'package']);
+            $table->decimal('berat_cucian', 8, 2)->default(0);
             $table->decimal('harga_satuan', 10, 2)->default(0);
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->timestamps();
