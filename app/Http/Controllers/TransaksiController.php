@@ -15,86 +15,110 @@ class TransaksiController extends Controller
             ->leftJoin('pelanggan', 'transaksi.pelanggan_id', '=', 'pelanggan.id')
             ->select('transaksi.*', 'pelanggan.nama_pelanggan')
             ->orderBy('id', 'desc')->get();
-        return view('transaksi.transaksi', compact('data'));
+
+        $pelangganList = DB::table('pelanggan')->orderBy('nama_pelanggan')->get();
+        $layananList = DB::table('layanan')->orderBy('nama_layanan')->get();
+        $paketList = DB::table('packages')->orderBy('nama_paket')->get();
+        return view('transaksi.transaksi', compact('data', 'pelangganList', 'layananList', 'paketList'));
     }
 
    public function store(Request $request)
 {
-    // Validasi data input
-    $validated = $request->validate([
+    $request->validate([
         'pelanggan_id' => 'required|exists:pelanggan,id',
-        'tanggal_transaksi' => 'nullable|date',
-        'items' => 'required|array|min:1',
-        'items.*.item_id' => 'required',
-        'items.*.item_type' => 'required|in:layanan,package',
-        'items.*.berat_cucian' => 'required|numeric|min:0.1',
-        'catatan' => 'nullable|string|max:500',
-        'status_pengerjaan' => 'nullable|in:Belum Diproses,Sedang Dikerjakan,Selesai',
-        'status_pembayaran' => 'nullable|in:Belum Dibayar,Sudah Dibayar'
+        'layanan_id'   => 'required|array',
+        'layanan_id.*' => 'exists:layanan,id',
+        'package_id'   => 'required|array',
+        'package_id.*' => 'exists:packages,id',
+        'jumlah'       => 'required|array',
+        'jumlah.*'     => 'integer|min:1',
+        'catatan'      => 'nullable|string',
     ]);
 
     DB::beginTransaction();
 
     try {
-        // Hitung total harga
+        // Hitung total harga dari detail layanan
         $totalHarga = 0;
-        $itemsData = [];
-
-        foreach ($validated['items'] as $item) {
-            // Ambil harga berdasarkan tipe item
-            if ($item['item_type'] === 'layanan') {
-                $hargaItem = DB::table('layanan')->where('id', $item['item_id'])->value('harga');
-            } else {
-                $hargaItem = DB::table('packages')->where('id', $item['item_id'])->value('harga');
-            }
-
-            if (!$hargaItem) {
-                throw new \Exception("Item dengan ID {$item['item_id']} tidak ditemukan");
-            }
-
-            $subtotal = $hargaItem * $item['berat_cucian'];
-
-            $itemsData[] = [
-                'item_id' => $item['item_id'],
-                'item_type' => $item['item_type'],
-                'berat_cucian' => $item['berat_cucian'],
-                'harga_satuan' => $hargaItem,
-                'subtotal' => $subtotal
-            ];
-
+        foreach ($request->layanan_id as $key => $layananId) {
+            $hargaLayanan = DB::table('layanan')->where('id', $layananId)->value('harga');
+            $subtotal = $hargaLayanan * $request->jumlah[$key];
             $totalHarga += $subtotal;
         }
 
-        // Buat transaksi
-        $transaksi = DB::table('transaksi')->insert([
-            'pelanggan_id' => $validated['pelanggan_id'],
-            'tanggal_transaksi' => $validated['tanggal_transaksi'] ?? now(),
+        // Simpan data transaksi utama
+        $transaksiId = DB::table('transaksi')->insertGetId([
+            'pelanggan_id' => $request->pelanggan_id,
+            'tanggal_transaksi' => now(),
             'total_harga' => $totalHarga,
-            'status_pengerjaan' => $validated['status_pengerjaan'] ?? 'Belum Diproses',
-            'status_pembayaran' => $validated['status_pembayaran'] ?? 'Belum Dibayar',
-            'catatan' => $validated['catatan'] ?? null
+            'status_pengerjaan' => 'Belum Diproses',   // dari schema
+            'status_pembayaran' => 'Belum Dibayar',    // dari schema
+            'status_pengambilan' => 'Belum Diambil',
+            'catatan' => $request->catatan,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        // Ambil transaksi yang baru dibuat
-        $transaksi = DB::table('transaksi')->where('id', DB::getPdo()->lastInsertId())->first();
-        // Buat detail transaksi
-        foreach ($itemsData as $item) {
+
+        // Simpan detail transaksi
+        foreach ($request->layanan_id as $key => $layananId) {
+            $hargaLayanan = DB::table('layanan')->where('id', $layananId)->value('harga');
+            $subtotal = $hargaLayanan * $request->jumlah[$key];
+
             DB::table('detail_transaksi')->insert([
-                'transaksi_id' => $transaksi->id,
-                'item_id' => $item['item_id'],
-                'item_type' => $item['item_type'],
-                'berat_cucian' => $item['berat_cucian'],
-                'harga_satuan' => $item['harga_satuan'],
-                'subtotal' => $item['subtotal']
+                'transaksi_id' => $transaksiId,
+                'item_id' => $layananId,
+                'item_type' => 'layanan',
+                'harga_satuan' => $hargaLayanan,
+                'berat_cucian' => $request->jumlah[$key],
+                'subtotal' => $subtotal,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         }
 
         DB::commit();
 
-            return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil disimpan!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['error' => 'Gagal menyimpan transaksi: ' . $e->getMessage()]);
+        return redirect()->back()->with('success', 'Transaksi berhasil disimpan!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Gagal menyimpan transaksi: ' . $e->getMessage());
+    }
+}
+
+
+    // ✅ Tampilkan detail transaksi
+    public function show($id)
+    {
+        // Get transaksi dengan join ke pelanggan
+        $transaksi = DB::table('transaksi')
+            ->leftJoin('pelanggan', 'transaksi.pelanggan_id', '=', 'pelanggan.id')
+            ->leftJoin('detail_transaksi', 'transaksi.id', '=', 'detail_transaksi.transaksi_id')
+            ->select('transaksi.*', 'pelanggan.nama_pelanggan', 'pelanggan.alamat', 'pelanggan.no_telfon', 'pelanggan.alamat', 'detail_transaksi.subtotal')
+            ->where('transaksi.id', $id)
+            ->first();
+
+        if (!$transaksi) {
+            return redirect()->route('transaksi.index')->with('error', 'Transaksi tidak ditemukan!');
         }
+
+        // Get detail transaksi dengan nama item
+        $details = DB::table('detail_transaksi')
+            ->where('transaksi_id', $id)
+            ->select('detail_transaksi.*')
+            ->get()
+            ->map(function ($detail) {
+                // Get nama item berdasarkan item_type
+                if ($detail->item_type === 'layanan') {
+                    $item = DB::table('layanan')->where('id', $detail->item_id)->first();
+                    $detail->nama_item = $item ? $item->nama_layanan : 'Item tidak ditemukan';
+                } else {
+                    $item = DB::table('packages')->where('id', $detail->item_id)->first();
+                    $detail->nama_item = $item ? $item->nama_paket : 'Item tidak ditemukan';
+                }
+                return $detail;
+            });
+
+        return view('transaksi.show', compact('transaksi', 'details'));
     }
 
     // ✅ Update data transaksi

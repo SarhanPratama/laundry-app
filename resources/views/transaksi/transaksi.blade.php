@@ -80,7 +80,11 @@
                                             <td>{{ $value->catatan }}</td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center">
-                                                    <a class="btn btn-success btn-sm" href="javascript:void(0)"
+                                                    <a class="btn btn-info btn-sm me-1" href="{{ url('transaksi/' . $value->id) }}"
+                                                        title="Lihat Detail">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a class="btn btn-success btn-sm me-1" href="javascript:void(0)"
                                                         onclick="editData('{{ $value->id }}', '{{ $value->pelanggan_id }}', '{{ $value->tanggal_transaksi }}', '{{ $value->total_harga }}', '{{ $value->status_pengerjaan }}', '{{ $value->status_pembayaran }}', `{{ $value->catatan }}`)"
                                                         title="Edit">
                                                         <i class="fas fa-edit"></i>
