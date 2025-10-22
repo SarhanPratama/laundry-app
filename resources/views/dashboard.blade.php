@@ -4,24 +4,158 @@
     <div class="row">
         <div class="col-xl-12">
             <div class="row">
-                <div class="col-xl-6">
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="card tryal-gradient">
-                                <div class="card-body tryal row">
-                                    <div class="col-xl-7 col-sm-6">
-                                        <h2>Manage your project in one touch</h2>
-                                        <span>Let Fillow manage your project automatically with our best AI systems
-                                        </span>
-                                        <a href="javascript:void(0);" class="btn btn-rounded  fs-18 font-w500">Try Free
-                                            Now</a>
+                <!-- Cards Statistik -->
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media align-items-center">
+                                <div class="media-body me-3">
+                                    <h2 class="fs-34 text-success font-w600">Rp. <span class="counter">{{ number_format($totalPendapatanHariIni, 0, ',', '.')}}</span></h2>
+                                    <p class="fs-16 mb-0">Pendapatan Hari Ini</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa fa-money-bill text-success" style="font-size:40px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media align-items-center">
+                                <div class="media-body me-3">
+                                    <h2 class="fs-34 text-primary font-w600"><span class="counter">{{ $totalTransaksiHariIni}}</span></h2>
+                                    <p class="fs-16 mb-0">Transaksi Hari Ini</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa fa-shopping-cart text-primary" style="font-size:40px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media align-items-center">
+                                <div class="media-body me-3">
+                                    <h2 class="fs-34 text-info font-w600"><span class="counter">{{ $totalPelanggan}}</span></h2>
+                                    <p class="fs-16 mb-0">Total Pelanggan</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fa fa-users text-info" style="font-size:40px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="media align-items-center">
+                                <div class="media-body me-3">
+                                    <h2 class="fs-34 text-warning font-w600"><span class="counter">{{ $cucianDalamProses}}</span></h2>
+                                    <p class="fs-16 mb-0">Cucian Dalam Proses</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-clock text-warning" style="font-size:40px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik -->
+                <div class="col-xl-8">
+                    <div class="card">
+                        <div class="card-header border-0 flex-wrap pb-0">
+                            <div class="mb-3">
+                                <h4 class="fs-20 font-w700">Statistik Pendapatan</h4>
+                                <span class="fs-14">Pendapatan per bulan dalam tahun {{ date('Y') }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body pb-0">
+                            <div id="revenueChart" style="min-height: 365px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card">
+                        <div class="card-header border-0">
+                            <h4 class="fs-20 font-w700">Status Cucian</h4>
+                            <span class="fs-14 font-w400 d-block">Jumlah cucian berdasarkan status</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="statusChart"></div>
+                            <div class="chart-point mt-4">
+                                <div class="check-point-area">
+                                    <div class="form-check custom-checkbox mb-2">
+                                        <input type="checkbox" class="form-check-input" id="customCheckBox1" checked>
+                                        <label class="form-check-label" for="customCheckBox1">Proses</label>
                                     </div>
-                                    <div class="col-xl-5 col-sm-6">
-                                        <img src="images/chart.png" alt="" class="sd-shape">
+                                    <div class="form-check custom-checkbox mb-2">
+                                        <input type="checkbox" class="form-check-input" id="customCheckBox2" checked>
+                                        <label class="form-check-label" for="customCheckBox2">Selesai</label>
+                                    </div>
+                                    <div class="form-check custom-checkbox mb-2">
+                                        <input type="checkbox" class="form-check-input" id="customCheckBox3" checked>
+                                        <label class="form-check-label" for="customCheckBox3">Diambil</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Transaksi Terbaru -->
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header border-0">
+                            <h4 class="fs-20 font-w700">Transaksi Terbaru</h4>
+                            <span class="fs-14 font-w400 d-block">Transaksi yang masuk hari ini</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Pelanggan</th>
+                                            <th>Total Harga</th>
+                                            <th>Status</th>
+                                            <th>Waktu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    @forelse($transaksiTerbaru as $key => $transaksi)
+                                        <tr>
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ $transaksi->pelanggan->nama }}</td>
+                                            <td>Rp. {{ number_format($transaksi->total_harga) }}</td>
+                                            <td>
+                                                @if($transaksi->status == 'proses')
+                                                    <span class="badge badge-warning">Proses</span>
+                                                @elseif($transaksi->status == 'selesai')
+                                                    <span class="badge badge-success">Selesai</span>
+                                                @else
+                                                    <span class="badge badge-primary">Diambil</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $transaksi->created_at->format('H:i') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="text-center">Belum ada transaksi hari ini</td>
+                                        </tr>
+                                    @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                         <div class="col-xl-12">
                             <div class="card">
                                 <div class="card-header border-0 flex-wrap">
@@ -773,3 +907,102 @@
     </div>
 </div>
 @endsection
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update counters
+    document.querySelector('.counter:contains("{{ number_format($totalPendapatanHariIni) }}")').textContent = '{{ number_format($totalPendapatanHariIni) }}';
+    document.querySelector('.counter:contains("{{ $totalTransaksiHariIni }}")').textContent = '{{ $totalTransaksiHariIni }}';
+    document.querySelector('.counter:contains("{{ $totalPelanggan }}")').textContent = '{{ $totalPelanggan }}';
+    document.querySelector('.counter:contains("{{ $cucianDalamProses }}")').textContent = '{{ $cucianDalamProses }}';
+
+    // Grafik Pendapatan
+    const revenueOptions = {
+        series: [{
+            name: 'Pendapatan',
+            data: [
+                @foreach($pendapatanBulanan as $data)
+                    {{ $data->total }},
+                @endforeach
+            ]
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        colors: ['#886CC0'],
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        },
+        yaxis: {
+            title: {
+                text: 'Rupiah (Rp)'
+            }
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return "Rp " + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
+            }
+        }
+    };
+
+    const revenueChart = new ApexCharts(document.querySelector("#revenueChart"), revenueOptions);
+    revenueChart.render();
+
+    // Grafik Status
+    const statusOptions = {
+        series: [
+            @foreach($statusCucian as $status)
+                {{ $status->total }},
+            @endforeach
+        ],
+        chart: {
+            type: 'donut',
+            height: 300
+        },
+        labels: [
+            @foreach($statusCucian as $status)
+                '{{ ucfirst($status->status) }}',
+            @endforeach
+        ],
+        colors: ['#FF9F00', '#00E396', '#008FFB'],
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
+    const statusChart = new ApexCharts(document.querySelector("#statusChart"), statusOptions);
+    statusChart.render();
+});
+</script>

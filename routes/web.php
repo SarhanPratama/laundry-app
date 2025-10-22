@@ -6,9 +6,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\PelangganController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('dashboard');
-});
+Route::get('/', 'App\Http\Controllers\DashboardController@index');
 
 
 Route::resource('package', PackageController::class);

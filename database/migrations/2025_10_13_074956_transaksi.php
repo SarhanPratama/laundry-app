@@ -13,19 +13,25 @@ return new class extends Migration
     {
         Schema::create('transaksi', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('pelanggan_id')->constrained('pelanggan')->onDelete('cascade');
             $table->dateTime('tanggal_transaksi')->default(now());
             $table->decimal('total_harga', 10, 2);   // Total harga cucian
+            
             $table->enum('status_pengerjaan', [
                 'Belum Diproses',
                 'Sedang Dikerjakan',
                 'Selesai'
             ])->default('Belum Diproses');
+
             $table->enum('status_pembayaran', [
                 'Belum Dibayar',
                 'Sudah Dibayar'
             ])->default('Belum Dibayar');
+
+            $table->enum('status_pengambilan', [
+                'Belum Diambil',
+                'Sudah Diambil'
+            ])->default('Belum Diambil');
             $table->text('catatan')->nullable();     // Catatan tambahan opsional
 
             $table->timestamps();

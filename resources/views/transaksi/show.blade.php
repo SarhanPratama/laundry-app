@@ -127,10 +127,10 @@
                                     @forelse($details as $detail)
                                     <tr>
                                         <td class="fw-bold">{{ $loop->iteration }}</td>
-                                        <td>{{ $detail->nama_item }}</td>
+                                        <td>{{ $detail->nama_layanan }}</td>
                                         <td>
                                             <span class="badge bg-light text-dark">
-                                                {{ ucfirst($detail->item_type) }}
+                                                {{ ucfirst($detail->nama_paket) }}
                                             </span>
                                         </td>
                                         <td class="text-end">{{ number_format($detail->berat_cucian, 2, ',', '.') }}</td>

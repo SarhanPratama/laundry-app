@@ -22,6 +22,7 @@
                         </button>
                     </div>
                     <div class="card-body">
+
                         @if (session('success'))
                             <div class="alert alert-success solid alert-end-icon alert-dismissible fade show">
                                 <span><i class="mdi mdi-check"></i></span>
@@ -64,9 +65,7 @@
                                             <td>
                                                 @if ($value->status_pengerjaan == 'Selesai')
                                                     <span class="badge badge-success">Selesai</span>
-                                                @elseif ($value->status_pengerjaan == 'Sedang Dikerjakan')
-                                                    <span class="badge badge-warning">Proses</span>
-                                                @elseif ($value->status_pengerjaan == 'Belum Diproses')
+                                                @else
                                                     <span class="badge badge-danger">Pending</span>
                                                 @endif
                                             </td>
@@ -76,12 +75,12 @@
                                                 @elseif ($value->status_pembayaran == 'Belum Dibayar')
                                                     <span class="badge badge-danger">Belum Lunas</span>
                                                 @endif
-                                               </td>
+                                            </td>
                                             <td>{{ $value->catatan }}</td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center">
-                                                    <a class="btn btn-info btn-sm me-1" href="{{ url('transaksi/' . $value->id) }}"
-                                                        title="Lihat Detail">
+                                                    <a class="btn btn-info btn-sm me-1"
+                                                        href="{{ url('transaksi/' . $value->id) }}" title="Lihat Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a class="btn btn-success btn-sm me-1" href="javascript:void(0)"
