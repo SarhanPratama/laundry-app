@@ -17,16 +17,16 @@ class PackageController extends Controller
     {
         $request->validate([
             'nama_paket' => 'required|string|max:100',
-            'harga' => 'required|numeric|min:0',
-            'waktu_pengerjaan' => 'required|integer|min:0',
-            'satuan_waktu' => 'required|in:menit,jam,hari',
+            // 'harga' => 'required|numeric|min:0',
+            // 'waktu_pengerjaan' => 'required|integer|min:0',
+            // 'satuan_waktu' => 'required|in:menit,jam,hari',
         ]);
 
         DB::table('packages')->insert([
             'nama_paket' => $request->nama_paket,
-            'harga' => $request->harga,
-            'waktu_pengerjaan' => $request->waktu_pengerjaan,
-            'satuan_waktu' => $request->satuan_waktu,
+            // 'harga' => $request->harga,
+            // 'waktu_pengerjaan' => $request->waktu_pengerjaan,
+            // 'satuan_waktu' => $request->satuan_waktu,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -38,16 +38,16 @@ class PackageController extends Controller
     {
         $request->validate([
             'nama_paket' => 'required|string|max:100',
-            'harga' => 'required|numeric|min:0',
-            'waktu_pengerjaan' => 'required|integer|min:0',
-            'satuan_waktu' => 'required|in:menit,jam,hari',
+            // 'harga' => 'required|numeric|min:0',
+            // 'waktu_pengerjaan' => 'required|integer|min:0',
+            // 'satuan_waktu' => 'required|in:menit,jam,hari',
         ]);
 
         DB::table('packages')->where('id', $id)->update([
             'nama_paket' => $request->nama_paket,
-            'harga' => $request->harga,
-            'waktu_pengerjaan' => $request->waktu_pengerjaan,
-            'satuan_waktu' => $request->satuan_waktu,
+            // 'harga' => $request->harga,
+            // 'waktu_pengerjaan' => $request->waktu_pengerjaan,
+            // 'satuan_waktu' => $request->satuan_waktu,
             'updated_at' => now(),
         ]);
 

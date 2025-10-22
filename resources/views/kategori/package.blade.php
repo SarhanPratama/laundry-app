@@ -43,8 +43,6 @@
                                     <tr>
                                         <th>No.</th>
                                         <th>Nama Paket</th>
-                                        <th>Harga</th>
-                                        <th>Waktu Pengerjaan</th>
                                         <th style="text-align:center;">Aksi
                                         </th>
                                     </tr>
@@ -60,13 +58,6 @@
                                                     </span>
                                                     {{ $value->nama_paket }}
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <strong class="text-success">Rp
-                                                    {{ number_format($value->harga, 0, ',', '.') }}</strong>
-                                            </td>
-                                            <td>
-                                                {{ $value->waktu_pengerjaan }} {{ $value->satuan_waktu }}
                                             </td>
                                             <td>
                                                 <div class="d-flex justify-content-center gap-2">
