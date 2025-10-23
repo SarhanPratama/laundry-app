@@ -38,7 +38,7 @@
             </li>
             <li>
                 <a class="" href="{{ url('transaksi') }}" aria-expanded="false">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-exchange-alt"></i>
                     <span class="nav-text">Transaksi</span>
                 </a>
             </li>
