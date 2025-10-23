@@ -32,7 +32,7 @@
                             {{-- Data Pelanggan --}}
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Pelanggan <span class="text-danger">*</span></label>
-                                <select class="form-control" name="pelanggan_id" required>
+                                <select class="default-select form-control wide" name="pelanggan_id" required>
                                     <option value="">-- Pilih Pelanggan --</option>
                                     @foreach($pelangganList as $p)
                                         <option value="{{ $p->id }}" {{ $transaksi->pelanggan_id == $p->id ? 'selected' : '' }}>
@@ -45,15 +45,13 @@
                             {{-- Status Pengerjaan --}}
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status Pengerjaan</label>
-                                <select class="form-control" name="status_pengerjaan" required>
-                                    <option value="Belum Diproses" {{ $transaksi->status_pengerjaan == 'Belum Diproses' ? 'selected' : '' }}>
-                                        Belum Diproses
+                                <select class="default-select form-control wide" name="status_pengerjaan" required>
+                                    <option value="Belum Siap" {{ $transaksi->status_pengerjaan == 'Belum Siap' ? 'selected' : '' }}>
+                                        Belum Siap
                                     </option>
-                                    <option value="Sedang Dikerjakan" {{ $transaksi->status_pengerjaan == 'Sedang Dikerjakan' ? 'selected' : '' }}>
-                                        Sedang Dikerjakan
-                                    </option>
-                                    <option value="Selesai" {{ $transaksi->status_pengerjaan == 'Selesai' ? 'selected' : '' }}>
-                                        Selesai
+
+                                    <option value="Sudah Siap" {{ $transaksi->status_pengerjaan == 'Sudah Siap' ? 'selected' : '' }}>
+                                        Sudah Siap
                                     </option>
                                 </select>
                             </div>
@@ -61,7 +59,7 @@
                             {{-- Status Pembayaran --}}
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status Pembayaran</label>
-                                <select class="form-control" name="status_pembayaran" required>
+                                <select class="default-select form-control wide" name="status_pembayaran" required>
                                     <option value="Belum Dibayar" {{ $transaksi->status_pembayaran == 'Belum Dibayar' ? 'selected' : '' }}>
                                         Belum Dibayar
                                     </option>
@@ -74,7 +72,7 @@
                             {{-- Status Pengambilan --}}
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status Pengambilan</label>
-                                <select class="form-control" name="status_pengambilan" required>
+                                <select class="default-select form-control wide" name="status_pengambilan" required>
                                     <option value="Belum Diambil" {{ $transaksi->status_pengambilan == 'Belum Diambil' ? 'selected' : '' }}>
                                         Belum Diambil
                                     </option>
@@ -106,7 +104,7 @@
                                     {{-- Layanan --}}
                                     <div class="col-md-3">
                                         <label class="form-label">Pilih Layanan</label>
-                                        <select name="items[{{$index}}][layanan_id]" class="form-control layanan-select">
+                                        <select name="items[{{$index}}][layanan_id]" class="default-select form-control wide layanan-select">
                                             <option value="">-- Pilih Layanan --</option>
                                             @foreach($layananList as $l)
                                                 <option value="{{ $l->id }}"
@@ -121,7 +119,7 @@
                                     {{-- Kategori/Paket --}}
                                     <div class="col-md-3">
                                         <label class="form-label">Kategori Paket</label>
-                                        <select name="items[{{$index}}][package_id]" class="form-control package-select">
+                                        <select name="items[{{$index}}][package_id]" class="default-select form-control wide package-select">
                                             <option value="">-- Pilih Kategori --</option>
                                             @foreach($paketList as $p)
                                                 <option value="{{ $p->id }}"
@@ -295,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="row g-3 layanan-item mb-5 bg-light p-3 rounded">
             <div class="col-md-3">
                 <label class="form-label">Pilih Layanan</label>
-                <select name="items[${itemCount}][layanan_id]" class="form-control layanan-select">
+                <select name="items[${itemCount}][layanan_id]" class="default-select form-control wide layanan-select">
                     <option value="">-- Pilih Layanan --</option>
                     @foreach($layananList as $l)
                     <option value="{{ $l->id }}" data-harga="{{ $l->harga }}">
@@ -306,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="col-md-3">
                 <label class="form-label">Kategori Paket</label>
-                <select name="items[${itemCount}][package_id]" class="form-control package-select">
+                <select name="items[${itemCount}][package_id]" class="default-select form-control wide package-select">
                     <option value="">-- Pilih Kategori --</option>
                     @foreach($paketList as $p)
                         <option value="{{ $p->id }}">{{ $p->nama_paket }}</option>

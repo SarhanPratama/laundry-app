@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pelanggan_id')->constrained('pelanggan')->onDelete('cascade');
             $table->dateTime('tanggal_transaksi')->default(now());
-            $table->decimal('total_harga', 10, 2);   // Total harga cucian
-            
+            $table->decimal('total_harga', 10, 2);
+
             $table->enum('status_pengerjaan', [
-                'Belum Diproses',
-                'Sedang Dikerjakan',
-                'Selesai'
-            ])->default('Belum Diproses');
+                'Belum Siap',
+                'Sudah Siap'
+            ])->default('Belum Siap');
 
             $table->enum('status_pembayaran', [
                 'Belum Dibayar',
@@ -32,7 +31,7 @@ return new class extends Migration
                 'Belum Diambil',
                 'Sudah Diambil'
             ])->default('Belum Diambil');
-            $table->text('catatan')->nullable();     // Catatan tambahan opsional
+            $table->text('catatan')->nullable();
 
             $table->timestamps();
         });

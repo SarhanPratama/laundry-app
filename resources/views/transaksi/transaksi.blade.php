@@ -65,10 +65,10 @@
                                             <td>Rp {{ number_format($value->total_harga, 0, ',', '.') }}</td>
                                             {{-- <td>{{ $value->nama_layanan}}</td> --}}
                                             <td>
-                                                @if ($value->status_pengerjaan == 'Selesai')
-                                                    <span class="badge badge-success">Selesai</span>
+                                                @if ($value->status_pengerjaan == 'Sudah Siap')
+                                                    <span class="badge badge-success">Sudah Siap</span>
                                                 @else
-                                                    <span class="badge badge-danger">Pending</span>
+                                                    <span class="badge badge-danger">Belum Siap</span>
                                                 @endif
                                             </td>
                                             <td>

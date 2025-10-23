@@ -83,6 +83,7 @@
                                     <i class="fas fa-box-open text-warning me-2"></i>
                                     <small class="text-muted">Status Pengambilan</small>
                                 </div>
+                                
                                 @if ($transaksi->status_pengambilan == 'Sudah Diambil')
                                     <span class="badge bg-success fs-6 px-3 py-2">
                                         <i class="fas fa-check-circle me-2"></i>Sudah Diambil

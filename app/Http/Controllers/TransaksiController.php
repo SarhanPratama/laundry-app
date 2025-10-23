@@ -104,7 +104,7 @@ class TransaksiController extends Controller
                 'pelanggan_id' => $request->pelanggan_id,
                 'tanggal_transaksi' => now(),
                 'total_harga' => $totalHarga,
-                'status_pengerjaan' => 'Belum Diproses',
+                'status_pengerjaan' => 'Belum Siap',
                 'status_pembayaran' => $request->status_pembayaran,
                 'status_pengambilan' => 'Belum Diambil',
                 'catatan' => $request->catatan,
@@ -169,6 +169,7 @@ class TransaksiController extends Controller
         $pelangganList = DB::table('pelanggan')->orderBy('nama_pelanggan')->get();
         $layananList = DB::table('layanan')->orderBy('nama_layanan')->get();
         $paketList = DB::table('packages')->orderBy('nama_paket')->get();
+
         return view('transaksi.edit', compact('transaksi', 'detailItems', 'pelangganList', 'layananList', 'paketList'));
     }
 
@@ -183,7 +184,7 @@ class TransaksiController extends Controller
             'items.*.harga_satuan' => 'required|numeric|min:0',
             'items.*.subtotal' => 'required|numeric|min:0',
             'status_pembayaran' => 'required|in:Belum Dibayar,Sudah Dibayar',
-            'status_pengerjaan' => 'required|in:Belum Diproses,Sedang Dikerjakan,Selesai',
+            'status_pengerjaan' => 'required|in:Belum Siap,Sudah Siap',
             'status_pengambilan' => 'required|in:Belum Diambil,Sudah Diambil',
             'catatan' => 'nullable|string',
         ]);
