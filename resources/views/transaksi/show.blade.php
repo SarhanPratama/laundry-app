@@ -39,7 +39,7 @@
                 <div class="card-body">
                     <!-- Status Section -->
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="status-item p-3 bg-light rounded">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-cog text-info me-2"></i>
@@ -60,7 +60,7 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="status-item p-3 bg-light rounded">
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-money-bill-wave text-success me-2"></i>
@@ -73,6 +73,23 @@
                                 @else
                                     <span class="badge bg-danger fs-6 px-3 py-2">
                                         <i class="fas fa-exclamation-circle me-2"></i>Belum Lunas
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="status-item p-3 bg-light rounded">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-box-open text-warning me-2"></i>
+                                    <small class="text-muted">Status Pengambilan</small>
+                                </div>
+                                @if ($transaksi->status_pengambilan == 'Sudah Diambil')
+                                    <span class="badge bg-success fs-6 px-3 py-2">
+                                        <i class="fas fa-check-circle me-2"></i>Sudah Diambil
+                                    </span>
+                                @else
+                                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                        <i class="fas fa-hourglass-half me-2"></i>Belum Diambil
                                     </span>
                                 @endif
                             </div>

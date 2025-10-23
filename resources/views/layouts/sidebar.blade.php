@@ -2,7 +2,7 @@
     <div class="dlabnav-scroll">
         <ul class="metismenu" id="menu">
             <li>
-                <a class="" href="javascript:void()" aria-expanded="false">
+                <a class="" href="{{ url('/') }}" aria-expanded="false">
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Dashboard</span>
                 </a>

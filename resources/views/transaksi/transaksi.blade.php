@@ -46,9 +46,10 @@
                                         <th><strong>Nama Pelanggan</strong></th>
                                         <th><strong>Tanggal Transaksi</strong></th>
                                         <th><strong>Total Harga</strong></th>
+                                        {{-- <th><strong>Layanan</strong></th> --}}
                                         <th><strong>Status Pengerjaan</strong></th>
                                         <th><strong>Status Pembayaran</strong></th>
-                                        <th><strong>Catatan</strong></th>
+                                        {{-- <th><strong>Catatan</strong></th> --}}
                                         <th style="text-align:center;"><strong>Aksi</strong></th>
                                     </tr>
                                 </thead>
@@ -62,6 +63,7 @@
                                             </td>
                                             <td>{{ $value->tanggal_transaksi }}</td>
                                             <td>Rp {{ number_format($value->total_harga, 0, ',', '.') }}</td>
+                                            {{-- <td>{{ $value->nama_layanan}}</td> --}}
                                             <td>
                                                 @if ($value->status_pengerjaan == 'Selesai')
                                                     <span class="badge badge-success">Selesai</span>
@@ -76,16 +78,14 @@
                                                     <span class="badge badge-danger">Belum Lunas</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $value->catatan }}</td>
+                                            {{-- <td>{{ $value->catatan }}</td> --}}
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center">
                                                     <a class="btn btn-info btn-sm me-1"
                                                         href="{{ url('transaksi/' . $value->id) }}" title="Lihat Detail">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a class="btn btn-success btn-sm me-1" href="javascript:void(0)"
-                                                        onclick="editData('{{ $value->id }}', '{{ $value->pelanggan_id }}', '{{ $value->tanggal_transaksi }}', '{{ $value->total_harga }}', '{{ $value->status_pengerjaan }}', '{{ $value->status_pembayaran }}', `{{ $value->catatan }}`)"
-                                                        title="Edit">
+                                                    <a class="btn btn-success btn-sm me-1" href="{{ route('transaksi.edit' , $value->id) }}">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     <form action="{{ url('transaksi/' . $value->id) }}" method="POST"
@@ -99,6 +99,7 @@
                                                 </div>
                                             </td>
                                         </tr>
+                                        {{-- @include('transaksi.edit') --}}
                                     @endforeach
                                 </tbody>
                             </table>

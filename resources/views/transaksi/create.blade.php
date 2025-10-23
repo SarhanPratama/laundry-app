@@ -13,22 +13,20 @@
 
                 <div class="modal-body">
                     {{-- Pilih Pelanggan --}}
-                    <div>
+                    <div class="mb-3">
                         <label for="pelanggan_id" class="form-label fw-semibold">Pelanggan <span
                                 class="text-danger">*</span></label>
-                        <select class="default-select  form-control wide" name="pelanggan_id" id="pelanggan_id"
-                            required>
+                        <select class="default-select form-control wide" name="pelanggan_id" id="pelanggan_id" required>
                             <option value="" disabled selected>-- Pilih Pelanggan --</option>
                             @foreach ($pelangganList as $p)
                                 <option value="{{ $p->id }}">{{ $p->nama_pelanggan }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <br>
+
                     <div class="mb-3">
-                        <label for="status_pembayaran">Status Pembayaran</label>
-                        <select class="default-select form-control wide" name="status_pembayaran" id="status_pembayaran"
-                            required>
+                        <label for="status_pembayaran" class="form-label">Status Pembayaran</label>
+                        <select class="default-select form-control wide" name="status_pembayaran" id="status_pembayaran" required>
                             <option value="Belum Dibayar">Belum Dibayar</option>
                             <option value="Sudah Dibayar">Sudah Dibayar</option>
                         </select>
@@ -48,16 +46,13 @@
                             {{-- Item pertama --}}
                             <div class="row g-2 layanan-item mb-3 align-items-end p-3 border rounded bg-light">
                                 <div class="col-md-3">
-                                    <label class="form-label form-label-sm">Layanan <span
-                                            class="text-danger">*</span></label>
-                                    <select name="items[0][layanan_id]"
-                                        class="default-select form-control wide layanan-select" required>
-                                        <option value="" data-harga="0">-- Pilih Layanan --</option>
-                                        @foreach ($layananList as $l)
-                                            <option value="{{ $l->id }}" data-harga="{{ $l->harga }}"
-                                                data-type="layanan">
-                                                {{ $l->nama_layanan }}
-                                                {{-- {{ 'Rp ' . number_format($l->harga, 0, ',', '.') }}/Kg --}}
+                                    <label class="form-label form-label-sm">Kategori Paket</label>
+                                    <select name="items[0][package_id]"
+                                        class="default-select form-control wide package-select">
+                                        <option value="">-- Pilih Kategori --</option>
+                                        @foreach ($paketList as $p)
+                                            <option value="{{ $p->id }}">
+                                                {{ $p->nama_paket }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -65,12 +60,12 @@
                                 <div class="col-md-3">
                                     <label class="form-label form-label-sm">Layanan <span
                                             class="text-danger">*</span></label>
-                                    <select name="items[0][package_id]"
+                                    <select name="items[0][layanan_id]"
                                         class="default-select form-control wide layanan-select" required>
-                                        <option value="" data-harga="0">-- Pilih Kategori --</option>
-                                        @foreach ($paketList as $l)
-                                            <option value="{{ $l->id }}" data-type="paket">
-                                                {{ $l->nama_paket }}
+                                        <option value="" data-harga="0">-- Pilih Layanan --</option>
+                                        @foreach ($layananList as $l)
+                                            <option value="{{ $l->id }}" data-harga="{{ $l->harga }}">
+                                                {{ $l->nama_layanan }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -83,11 +78,9 @@
                                         step="0.1" min="0.1" required>
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label form-label-sm">Harga Satuan <span
-                                            class="text-danger">*</span></label>
+                                    <label class="form-label form-label-sm">Harga Satuan</label>
                                     <input type="number" class="form-control form-control-sm harga-satuan-input"
                                         placeholder="0" step="100" min="0" required disabled>
-                                    {{-- Hidden input untuk mengirim harga satuan final --}}
                                     <input type="hidden" name="items[0][harga_satuan]" class="harga-satuan-hidden"
                                         value="0">
                                 </div>
@@ -98,18 +91,16 @@
                                     <input type="hidden" name="items[0][subtotal]" class="subtotal-hidden"
                                         value="0">
                                 </div>
-                                <div class="col-12 col-md-auto mt-2 mt-md-0">
-                                    <div class="form-check form-switch mb-1">
+                                <div class="col-md-2">
+                                    <div class="form-check form-switch mb-2">
                                         <input class="form-check-input manual-price-toggle" type="checkbox"
                                             role="switch" id="manualPriceToggle_0">
-                                        <label class="form-check-label small" for="manualPriceToggle_0">Manual</label>
+                                        <label class="form-check-label small" for="manualPriceToggle_0">Harga Manual</label>
                                     </div>
-                                    <button type="button" class="btn btn-danger btn-sm remove-layanan w-100"
-                                        disabled>
+                                    <button type="button" class="btn btn-danger btn-sm remove-layanan w-100" disabled>
                                         <i class="fas fa-trash"></i> Hapus
                                     </button>
                                 </div>
-                                <input type="hidden" name="items[0][item_type]" value="layanan">
                             </div>
                         </div>
 
@@ -136,14 +127,14 @@
     </div>
 </div>
 
-{{-- Script di bawah form atau di section scripts --}}
+@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('layanan-container');
         const addBtn = document.getElementById('add-layanan');
-        let itemCount = 1; // Index untuk item berikutnya
+        const form = document.getElementById('formTambahTransaksi');
+        let itemCount = 1;
 
-        // Format Rupiah
         const formatter = new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
@@ -151,25 +142,6 @@
             maximumFractionDigits: 0
         });
 
-        // Format Angka Biasa (untuk input number)
-        function formatAsNumber(value) {
-            // Hapus karakter non-digit kecuali tanda minus di awal
-            let numberString = String(value).replace(/[^\d-]/g, '');
-            // Hapus tanda minus jika bukan di awal
-            numberString = numberString.replace(/(?!^-)-/g, '');
-            // Hapus nol di depan jika lebih dari satu digit dan bukan desimal
-            if (numberString.length > 1 && numberString.startsWith('0') && !numberString.startsWith('0.')) {
-                numberString = numberString.replace(/^0+/, '');
-            }
-            // Hapus tanda minus jika nilainya 0
-            if (numberString === '-0' || numberString === '-') {
-                numberString = '0';
-            }
-            return numberString === '' ? '0' : numberString; // Kembalikan '0' jika string kosong
-        }
-
-
-        // Fungsi hitung subtotal
         function hitungSubtotal(row) {
             const layananSelect = row.querySelector('.layanan-select');
             const beratInput = row.querySelector('.berat-input');
@@ -179,154 +151,239 @@
             const subtotalHidden = row.querySelector('.subtotal-hidden');
             const manualToggle = row.querySelector('.manual-price-toggle');
 
-            const selectedOption = layananSelect.options[layananSelect.selectedIndex];
-            const hargaOtomatis = selectedOption ? parseFloat(selectedOption.dataset.harga) || 0 : 0;
-            const berat = parseFloat(beratInput.value) || 0;
-            let hargaFinal = 0;
+            let harga = 0;
 
+            // Jika manual toggle aktif, gunakan harga dari input manual
             if (manualToggle.checked) {
-                // Jika manual, ambil dari input harga-satuan-input
-                hargaFinal = parseFloat(formatAsNumber(hargaSatuanInput.value)) || 0;
-                hargaSatuanInput.disabled = false; // Pastikan enabled
+                harga = Number(hargaSatuanInput.value) || 0;
             } else {
-                // Jika otomatis, gunakan harga dari select dan update input harga-satuan-input
-                hargaFinal = hargaOtomatis;
-                hargaSatuanInput.value = formatAsNumber(hargaOtomatis); // Tampilkan harga otomatis (angka saja)
-                hargaSatuanInput.disabled = true; // Kunci inputnya
+                // Jika manual toggle tidak aktif, gunakan harga dari layanan
+                const selectedOption = layananSelect.options[layananSelect.selectedIndex];
+                harga = selectedOption ? Number(selectedOption.dataset.harga) || 0 : 0;
+                // Update harga satuan input dengan harga dari layanan
+                hargaSatuanInput.value = harga;
             }
 
-            // Update hidden input harga satuan yang akan dikirim
-            hargaSatuanHidden.value = hargaFinal;
+            const berat = Number(beratInput.value) || 0;
 
-            // Hitung dan update subtotal
-            const subtotal = hargaFinal * berat;
-            subtotalDisplay.value = formatter.format(subtotal);
+            // Update hidden field
+            hargaSatuanHidden.value = harga;
+
+            // Hitung subtotal
+            const subtotal = harga * berat;
+            subtotalDisplay.value = formatter.format(subtotal).replace('IDR', 'Rp');
             subtotalHidden.value = subtotal;
 
             hitungTotal();
         }
 
-        // Fungsi hitung total
+        function toggleManualPrice(row) {
+            const manualToggle = row.querySelector('.manual-price-toggle');
+            const hargaSatuanInput = row.querySelector('.harga-satuan-input');
+            const layananSelect = row.querySelector('.layanan-select');
+
+            if (manualToggle.checked) {
+                // Aktifkan input manual
+                hargaSatuanInput.disabled = false;
+                hargaSatuanInput.required = true;
+                // Jika layanan dipilih, gunakan harga layanan sebagai default
+                if (layananSelect.value) {
+                    const selectedOption = layananSelect.options[layananSelect.selectedIndex];
+                    const hargaLayanan = Number(selectedOption.dataset.harga) || 0;
+                    hargaSatuanInput.value = hargaLayanan;
+                }
+            } else {
+                // Nonaktifkan input manual
+                hargaSatuanInput.disabled = true;
+                hargaSatuanInput.required = false;
+                // Reset ke harga layanan
+                if (layananSelect.value) {
+                    const selectedOption = layananSelect.options[layananSelect.selectedIndex];
+                    const hargaLayanan = Number(selectedOption.dataset.harga) || 0;
+                    hargaSatuanInput.value = hargaLayanan;
+                } else {
+                    hargaSatuanInput.value = '';
+                }
+            }
+            hitungSubtotal(row);
+        }
+
         function hitungTotal() {
+            const subtotalInputs = document.querySelectorAll('.subtotal-hidden');
             let total = 0;
-            container.querySelectorAll('.subtotal-hidden').forEach(input => {
-                total += parseFloat(input.value) || 0;
+
+            subtotalInputs.forEach(input => {
+                total += Number(input.value) || 0;
             });
-            document.getElementById('total-keseluruhan').textContent = formatter.format(total);
+
+            document.getElementById('total-keseluruhan').textContent = formatter.format(total).replace('IDR', 'Rp');
         }
 
-        // Fungsi update tombol hapus
-        function updateRemoveButtons() {
-            const items = container.querySelectorAll('.layanan-item');
-            items.forEach((item, index) => {
-                const removeBtn = item.querySelector('.remove-layanan');
-                removeBtn.disabled = items.length <= 1; // Disable jika hanya ada 1 item
-            });
-        }
-
-        // Event listener utama pada container (Event Delegation)
+        // Event delegation untuk perubahan pada elemen dinamis
         container.addEventListener('change', function(e) {
-            const target = e.target;
-            const row = target.closest('.layanan-item');
+            const row = e.target.closest('.layanan-item');
             if (!row) return;
 
-            if (target.matches('.layanan-select') || target.matches('.manual-price-toggle')) {
-                // Jika layanan atau toggle manual berubah, hitung ulang subtotal
+            if (e.target.matches('.layanan-select') || e.target.matches('.berat-input')) {
+                // Jika layanan berubah dan manual toggle tidak aktif, update harga
+                if (e.target.matches('.layanan-select') && !row.querySelector('.manual-price-toggle').checked) {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const harga = selectedOption ? Number(selectedOption.dataset.harga) || 0 : 0;
+                    row.querySelector('.harga-satuan-input').value = harga;
+                }
+                hitungSubtotal(row);
+            } else if (e.target.matches('.manual-price-toggle')) {
+                toggleManualPrice(row);
+            } else if (e.target.matches('.harga-satuan-input')) {
                 hitungSubtotal(row);
             }
         });
 
         container.addEventListener('input', function(e) {
-            const target = e.target;
-            const row = target.closest('.layanan-item');
-            if (!row) return;
-
-            // Format input harga saat diketik
-            if (target.matches('.harga-satuan-input')) {
-                // Pastikan hanya angka yang masuk
-                target.value = formatAsNumber(target.value);
-                // Hitung ulang subtotal saat harga manual diubah
-                hitungSubtotal(row);
-            } else if (target.matches('.berat-input')) {
-                // Hitung ulang subtotal saat berat berubah
-                hitungSubtotal(row);
+            if (e.target.matches('.berat-input') || e.target.matches('.harga-satuan-input')) {
+                hitungSubtotal(e.target.closest('.layanan-item'));
             }
         });
 
-
-        // Event listener untuk tombol hapus
         container.addEventListener('click', function(e) {
-            const removeBtn = e.target.closest('.remove-layanan');
-            if (removeBtn) {
-                const item = removeBtn.closest('.layanan-item');
-                item.remove();
-                hitungTotal();
-                updateRemoveButtons();
+            if (e.target.closest('.remove-layanan')) {
+                const items = container.querySelectorAll('.layanan-item');
+                if (items.length > 1) {
+                    e.target.closest('.layanan-item').remove();
+                    hitungTotal();
+                } else {
+                    alert('Minimal harus ada 1 item!');
+                }
             }
         });
 
-        // Event listener untuk tombol tambah
         addBtn.addEventListener('click', function() {
-            const index = itemCount++;
-            const newItemHtml = `
+            const template = `
             <div class="row g-2 layanan-item mb-3 align-items-end p-3 border rounded bg-light">
                 <div class="col-md-3">
-                    <label class="form-label form-label-sm">Layanan <span class="text-danger">*</span></label>
-                    <select name="items[${index}][layanan_id]" class="default-select form-control wide layanan-select" required>
-                        <option value="" data-harga="0">-- Pilih Layanan --</option>
-                        @foreach ($layananList as $l)
-                            <option value="{{ $l->id }}" data-harga="{{ $l->harga }}" data-type="layanan">
-                                {{ $l->nama_layanan }} - {{ 'Rp ' . number_format($l->harga, 0, ',', '.') }}/Kg
+                    <label class="form-label form-label-sm">Kategori Paket</label>
+                    <select name="items[${itemCount}][package_id]" class="default-select form-control wide package-select">
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach ($paketList as $p)
+                            <option value="{{ $p->id }}">
+                                {{ $p->nama_paket }}
                             </option>
                         @endforeach
                     </select>
                 </div>
-                 <div class="col-md-3">
+                <div class="col-md-3">
                     <label class="form-label form-label-sm">Layanan <span class="text-danger">*</span></label>
-                    <select name="items[0][package_id]" class="default-select form-control wide layanan-select" required>
-                        <option value="" data-harga="0">-- Pilih Kategori --</option>
-                        @foreach ($paketList as $l)
-                            <option value="{{ $l->id }}" data-type="paket">
-                                {{ $l->nama_paket }}
+                    <select name="items[${itemCount}][layanan_id]" class="default-select form-control wide layanan-select" required>
+                        <option value="" data-harga="0">-- Pilih Layanan --</option>
+                        @foreach ($layananList as $l)
+                            <option value="{{ $l->id }}" data-harga="{{ $l->harga }}">
+                                {{ $l->nama_layanan }}
                             </option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label form-label-sm">Berat (Kg) <span class="text-danger">*</span></label>
-                    <input type="number" name="items[${index}][berat_cucian]" class="form-control form-control-sm berat-input"
+                    <input type="number" name="items[${itemCount}][berat_cucian]" class="form-control form-control-sm berat-input"
                            placeholder="0.0" step="0.1" min="0.1" required>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label form-label-sm">Harga Satuan <span class="text-danger">*</span></label>
+                    <label class="form-label form-label-sm">Harga Satuan</label>
                     <input type="number" class="form-control form-control-sm harga-satuan-input"
                            placeholder="0" step="100" min="0" required disabled>
-                     <input type="hidden" name="items[${index}][harga_satuan]" class="harga-satuan-hidden" value="0">
+                    <input type="hidden" name="items[${itemCount}][harga_satuan]" class="harga-satuan-hidden" value="0">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label form-label-sm">Subtotal</label>
                     <input type="text" class="form-control form-control-sm subtotal-display" readonly placeholder="Rp 0">
-                    <input type="hidden" name="items[${index}][subtotal]" class="subtotal-hidden" value="0">
+                    <input type="hidden" name="items[${itemCount}][subtotal]" class="subtotal-hidden" value="0">
                 </div>
-                <div class="col-12 col-md-auto mt-2 mt-md-0">
-                     <div class="form-check form-switch mb-1">
-                        <input class="form-check-input manual-price-toggle" type="checkbox" role="switch" id="manualPriceToggle_${index}">
-                        <label class="form-check-label small" for="manualPriceToggle_${index}">Manual</label>
+                <div class="col-md-2">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input manual-price-toggle" type="checkbox" role="switch"
+                               id="manualPriceToggle_${itemCount}">
+                        <label class="form-check-label small" for="manualPriceToggle_${itemCount}">Harga Manual</label>
                     </div>
                     <button type="button" class="btn btn-danger btn-sm remove-layanan w-100">
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </div>
-                <input type="hidden" name="items[${index}][item_type]" value="layanan">
-            </div>
-        `;
-            container.insertAdjacentHTML('beforeend', newItemHtml);
-            updateRemoveButtons();
+            </div>`;
+
+            container.insertAdjacentHTML('beforeend', template);
+            const newItem = container.lastElementChild;
+
+            // Re-init select2 jika menggunakan select2
+            // const selects = newItem.querySelectorAll('select');
+            // if (window.jQuery && jQuery().select2) {
+            //     selects.forEach(select => {
+            //         $(select).select2();
+            //     });
+            // }
+
+            itemCount++;
         });
 
+        // Validasi form sebelum submit
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const errorMessages = [];
 
-        // Inisialisasi state awal (hitung subtotal & total, update tombol)
-        container.querySelectorAll('.layanan-item').forEach(row => hitungSubtotal(row));
-        updateRemoveButtons();
+            // Validasi pelanggan
+            const pelangganSelect = document.getElementById('pelanggan_id');
+            if (!pelangganSelect.value) {
+                isValid = false;
+                errorMessages.push('Pilih pelanggan terlebih dahulu');
+            }
+
+            // Validasi items
+            const layananItems = container.querySelectorAll('.layanan-item');
+            let hasValidItem = false;
+
+            layananItems.forEach((item, index) => {
+                const layananSelect = item.querySelector('.layanan-select');
+                const beratInput = item.querySelector('.berat-input');
+                const hargaSatuanInput = item.querySelector('.harga-satuan-input');
+                const manualToggle = item.querySelector('.manual-price-toggle');
+
+                // Validasi layanan wajib diisi
+                if (!layananSelect.value) {
+                    isValid = false;
+                    errorMessages.push(`Item ${index + 1}: Pilih layanan terlebih dahulu`);
+                }
+
+                // Validasi berat
+                if (!beratInput.value || Number(beratInput.value) <= 0) {
+                    isValid = false;
+                    errorMessages.push(`Item ${index + 1}: Berat harus lebih dari 0`);
+                }
+
+                // Validasi harga manual jika toggle aktif
+                if (manualToggle.checked && (!hargaSatuanInput.value || Number(hargaSatuanInput.value) <= 0)) {
+                    isValid = false;
+                    errorMessages.push(`Item ${index + 1}: Harga manual harus lebih dari 0`);
+                }
+
+                // Cek jika ada item yang valid
+                if (layananSelect.value && beratInput.value && Number(beratInput.value) > 0) {
+                    hasValidItem = true;
+                }
+            });
+
+            // Validasi minimal ada 1 item yang valid
+            if (!hasValidItem) {
+                isValid = false;
+                errorMessages.push('Minimal harus ada 1 item layanan yang valid');
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Perbaiki kesalahan berikut:\n' + errorMessages.join('\n'));
+            }
+        });
+
+        // Hitung subtotal untuk item pertama saat load
+        document.querySelectorAll('.layanan-item').forEach(row => hitungSubtotal(row));
     });
 </script>
+@endpush
