@@ -55,7 +55,7 @@
                                     </span>
                                 @else
                                     <span class="badge bg-secondary fs-6 px-3 py-2">
-                                        <i class="fas fa-hourglass me-2"></i>Pending
+                                        <i class="fas fa-hourglass me-2"></i>Belum Siap
                                     </span>
                                 @endif
                             </div>
@@ -83,7 +83,6 @@
                                     <i class="fas fa-box-open text-warning me-2"></i>
                                     <small class="text-muted">Status Pengambilan</small>
                                 </div>
-                                
                                 @if ($transaksi->status_pengambilan == 'Sudah Diambil')
                                     <span class="badge bg-success fs-6 px-3 py-2">
                                         <i class="fas fa-check-circle me-2"></i>Sudah Diambil
@@ -134,30 +133,51 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="5%">#</th>
-                                        <th width="30%">Item</th>
-                                        <th width="15%">Tipe</th>
-                                        <th width="15%" class="text-end">Berat (Kg)</th>
-                                        <th width="18%" class="text-end">Harga/Kg</th>
-                                        <th width="17%" class="text-end">Subtotal</th>
+                                        <th width="25%">Layanan</th>
+                                        <th width="20%">Paket</th>
+                                        <th width="10%" class="text-end">Berat (Kg)</th>
+                                        <th width="15%" class="text-end">Harga Layanan</th>
+                                        <th width="15%" class="text-end">Harga Paket</th>
+                                        <th width="15%" class="text-end">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $totalHargaLayanan = 0;
+                                        $totalHargaPaket = 0;
+                                    @endphp
                                     @forelse($details as $detail)
+                                    @php
+                                        $hargaLayananTotal = $detail->harga_layanan * $detail->berat_cucian;
+                                        $hargaPaketTotal = $detail->harga_paket;
+                                        $totalHargaLayanan += $hargaLayananTotal;
+                                        $totalHargaPaket += $hargaPaketTotal;
+                                    @endphp
                                     <tr>
                                         <td class="fw-bold">{{ $loop->iteration }}</td>
-                                        <td>{{ $detail->nama_layanan }}</td>
                                         <td>
-                                            <span class="badge bg-light text-dark">
-                                                {{ ucfirst($detail->nama_paket) }}
-                                            </span>
+                                            <div class="fw-semibold">{{ $detail->nama_layanan }}</div>
+                                            <small class="text-muted">Rp {{ number_format($detail->harga_layanan, 0, ',', '.') }}/kg</small>
+                                        </td>
+                                        <td>
+                                            @if($detail->nama_paket)
+                                                <span class="badge bg-primary">
+                                                    {{ $detail->nama_paket }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">Rp {{ number_format($detail->harga_paket, 0, ',', '.') }}</small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td class="text-end">{{ number_format($detail->berat_cucian, 2, ',', '.') }}</td>
-                                        <td class="text-end">Rp {{ number_format($detail->harga_satuan, 0, ',', '.') }}</td>
-                                        <td class="text-end fw-bold">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
+                                        <td class="text-end">Rp {{ number_format($hargaLayananTotal, 0, ',', '.') }}</td>
+                                        <td class="text-end">Rp {{ number_format($hargaPaketTotal, 0, ',', '.') }}</td>
+                                        <td class="text-end fw-bold text-primary">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="7" class="text-center text-muted py-4">
                                             <i class="fas fa-inbox me-2"></i>Tidak ada item
                                         </td>
                                     </tr>
@@ -165,12 +185,55 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Summary Cards -->
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="card border-0 bg-light shadow-sm h-100">
+                                    <div class="card-body text-center">
+                                        <div class="text-muted small mb-2">
+                                            <i class="fas fa-weight-hanging me-2"></i>Total Berat
+                                        </div>
+                                        <div class="fw-bold fs-5 text-dark">
+                                            {{ number_format($details->sum('berat_cucian'), 2, ',', '.') }} kg
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 bg-light shadow-sm h-100">
+                                    <div class="card-body text-center">
+                                        <div class="text-muted small mb-2">
+                                            <i class="fas fa-tags me-2"></i>Total Harga Layanan
+                                        </div>
+                                        <div class="fw-bold fs-5 text-info">
+                                            Rp {{ number_format($totalHargaLayanan, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 bg-light shadow-sm h-100">
+                                    <div class="card-body text-center">
+                                        <div class="text-muted small mb-2">
+                                            <i class="fas fa-box me-2"></i>Total Harga Paket
+                                        </div>
+                                        <div class="fw-bold fs-5 text-warning">
+                                            Rp {{ number_format($totalHargaPaket, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Total Harga Keseluruhan -->
                         <div class="mt-4">
-                            <div class="card border-0 bg-light shadow-sm">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold fs-5 text-dark"><i class="fas fa-money-bill-wave me-2 text-success"></i>Total Harga Keseluruhan</span>
-                                    <span class="fw-bold fs-4 text-success">Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}</span>
+                            <div class="card border-0 bg-primary text-white shadow-lg">
+                                <div class="card-body d-flex justify-content-between align-items-center py-3">
+                                    <span class="fw-bold fs-5">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Total Harga Keseluruhan
+                                    </span>
+                                    <span class="fw-bold fs-3">Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                         </div>

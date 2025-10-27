@@ -61,7 +61,8 @@ class TransaksiController extends Controller
             'items.*.package_id' => 'nullable|exists:packages,id',
             'items.*.berat_cucian' => 'required|numeric|min:0.1',
             'items.*.subtotal' => 'required|numeric|min:0',
-            // 'items.*.harga_satuan' => 'required|numeric|min:0',
+            'items.*.harga_layanan' => 'required|numeric|min:0',
+            'items.*.harga_paket' => 'required|numeric|min:0',
             'status_pembayaran' => 'required|in:Belum Dibayar,Sudah Dibayar',
             'catatan' => 'nullable|string',
         ]);
@@ -70,29 +71,52 @@ class TransaksiController extends Controller
 
         try {
             $layananIds = array_column($request->items, 'layanan_id');
+            $packageIds = array_column($request->items, 'package_id');
+            $packageIds = array_filter($packageIds); // Hapus nilai null
+
+            // Ambil data layanan dan package dari database
             $layananData = DB::table('layanan')->whereIn('id', $layananIds)->pluck('harga', 'id');
+
+            $packageData = [];
+            if (!empty($packageIds)) {
+                $packageData = DB::table('packages')->whereIn('id', $packageIds)->pluck('harga_kategori', 'id');
+            }
 
             $totalHarga = 0;
             $itemsToInsert = []; // Siapkan array untuk detail transaksi
 
             foreach ($request->items as $item) {
                 $layananId = $item['layanan_id'];
+                $packageId = $item['package_id'] ?? null;
                 $berat = $item['berat_cucian'];
+                $hargaLayananInput = $item['harga_layanan'];
+                $hargaPaketInput = $item['harga_paket'];
 
+                // Validasi layanan
                 if (!isset($layananData[$layananId])) {
                     throw new \Exception("Layanan dengan ID {$layananId} tidak ditemukan atau tidak valid.");
                 }
 
-                $hargaSatuan = $layananData[$layananId];
-                $subtotal = $hargaSatuan * $berat;
+                // Validasi package jika dipilih
+                if ($packageId && !isset($packageData[$packageId])) {
+                    throw new \Exception("Package dengan ID {$packageId} tidak ditemukan atau tidak valid.");
+                }
+
+                // Gunakan harga dari input form (bisa dari data attribute di select option)
+                $hargaLayanan = $hargaLayananInput;
+                $hargaPaket = $hargaPaketInput;
+
+                // Hitung subtotal: (harga layanan × berat) + harga paket (flat)
+                $subtotal = ($hargaLayanan * $berat) + $hargaPaket;
 
                 $totalHarga += $subtotal;
 
                 $itemsToInsert[] = [
                     'layanan_id' => $layananId,
-                    'package_id' => $item['package_id'] ?? null,
+                    'package_id' => $packageId,
                     'berat_cucian' => $berat,
-                    'harga_satuan' => $hargaSatuan,
+                    'harga_layanan' => $hargaLayanan, // Simpan harga layanan per kg
+                    'harga_paket' => $hargaPaket,     // Simpan harga paket flat
                     'subtotal' => $subtotal,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -112,9 +136,11 @@ class TransaksiController extends Controller
                 'updated_at' => now(),
             ]);
 
+            // Tambahkan transaksi_id ke setiap item detail
             foreach ($itemsToInsert as &$itemDetail) {
                 $itemDetail['transaksi_id'] = $transaksiId;
             }
+
             DB::table('detail_transaksi')->insert($itemsToInsert);
 
             DB::commit();
@@ -146,7 +172,7 @@ class TransaksiController extends Controller
             ->leftJoin('layanan', 'detail_transaksi.layanan_id', '=', 'layanan.id')
             ->leftJoin('packages', 'detail_transaksi.package_id', '=', 'packages.id')
             ->where('transaksi_id', $id)
-            ->select('detail_transaksi.*', 'layanan.nama_layanan','packages.id as packageId', 'packages.nama_paket')
+            ->select('detail_transaksi.*', 'layanan.nama_layanan', 'packages.id as packageId', 'packages.nama_paket')
             ->get();
         return view('transaksi.show', compact('transaksi', 'details'));
     }
@@ -175,16 +201,18 @@ class TransaksiController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Validasi data
         $request->validate([
             'pelanggan_id' => 'required|exists:pelanggan,id',
             'items' => 'required|array|min:1',
             'items.*.layanan_id' => 'required|exists:layanan,id',
             'items.*.package_id' => 'nullable|exists:packages,id',
             'items.*.berat_cucian' => 'required|numeric|min:0.1',
-            'items.*.harga_satuan' => 'required|numeric|min:0',
             'items.*.subtotal' => 'required|numeric|min:0',
-            'status_pembayaran' => 'required|in:Belum Dibayar,Sudah Dibayar',
+            'items.*.harga_layanan' => 'required|numeric|min:0',
+            'items.*.harga_paket' => 'required|numeric|min:0',
             'status_pengerjaan' => 'required|in:Belum Siap,Sudah Siap',
+            'status_pembayaran' => 'required|in:Belum Dibayar,Sudah Dibayar',
             'status_pengambilan' => 'required|in:Belum Diambil,Sudah Diambil',
             'catatan' => 'nullable|string',
         ]);
@@ -192,46 +220,109 @@ class TransaksiController extends Controller
         DB::beginTransaction();
 
         try {
-            // Hitung ulang total harga
-            $totalHarga = collect($request->items)->sum('subtotal');
+            // Ambil data transaksi yang akan diupdate
+            $transaksi = DB::table('transaksi')->where('id', $id)->first();
 
-            // Update transaksi utama
-            DB::table('transaksi')->where('id', $id)->update([
-                'pelanggan_id' => $request->pelanggan_id,
-                'total_harga' => $totalHarga,
-                'status_pembayaran' => $request->status_pembayaran,
-                'status_pengerjaan' => $request->status_pengerjaan,
-                'status_pengambilan' => $request->status_pengambilan,
-                'catatan' => $request->catatan,
-                'updated_at' => now(),
-            ]);
-
-            // Hapus detail lama
-            DB::table('detail_transaksi')->where('transaksi_id', $id)->delete();
-
-            // Insert ulang detail transaksi
-            $itemsToInsert = [];
-            foreach ($request->items as $item) {
-                $itemsToInsert[] = [
-                    'transaksi_id' => $id,
-                    'layanan_id' => $item['layanan_id'],
-                    'package_id' => $item['package_id'] ?? null,
-                    'berat_cucian' => $item['berat_cucian'],
-                    'harga_satuan' => $item['harga_satuan'] ?? 0,
-                    'subtotal' => $item['subtotal'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+            if (!$transaksi) {
+                throw new \Exception("Transaksi tidak ditemukan.");
             }
 
-            DB::table('detail_transaksi')->insert($itemsToInsert);
+            $layananIds = array_column($request->items, 'layanan_id');
+            $packageIds = array_column($request->items, 'package_id');
+            $packageIds = array_filter($packageIds); // Hapus nilai null
+
+            // Ambil data layanan dan package dari database untuk validasi
+            $layananData = DB::table('layanan')->whereIn('id', $layananIds)->pluck('harga', 'id');
+
+            $packageData = [];
+            if (!empty($packageIds)) {
+                $packageData = DB::table('packages')->whereIn('id', $packageIds)->pluck('harga_kategori', 'id');
+            }
+
+            $totalHarga = 0;
+            $updatedDetailIds = []; // Untuk melacak detail yang diupdate
+
+            foreach ($request->items as $item) {
+                $layananId = $item['layanan_id'];
+                $packageId = $item['package_id'] ?? null;
+                $berat = $item['berat_cucian'];
+                $hargaLayananInput = $item['harga_layanan'];
+                $hargaPaketInput = $item['harga_paket'];
+                $detailId = $item['detail_id'] ?? null;
+
+                // Validasi layanan
+                if (!isset($layananData[$layananId])) {
+                    throw new \Exception("Layanan dengan ID {$layananId} tidak ditemukan atau tidak valid.");
+                }
+
+                // Validasi package jika dipilih
+                if ($packageId && !isset($packageData[$packageId])) {
+                    throw new \Exception("Package dengan ID {$packageId} tidak ditemukan atau tidak valid.");
+                }
+
+                // Gunakan harga dari input form
+                $hargaLayanan = $hargaLayananInput;
+                $hargaPaket = $hargaPaketInput;
+
+                // Hitung subtotal: (harga layanan × berat) + harga paket (flat)
+                $subtotal = ($hargaLayanan * $berat) + $hargaPaket;
+                $totalHarga += $subtotal;
+
+                // Data untuk update/insert detail transaksi
+                $detailData = [
+                    'layanan_id' => $layananId,
+                    'package_id' => $packageId,
+                    'berat_cucian' => $berat,
+                    'harga_layanan' => $hargaLayanan,
+                    'harga_paket' => $hargaPaket,
+                    'subtotal' => $subtotal,
+                    'updated_at' => now(),
+                ];
+
+                if ($detailId) {
+                    // Update detail yang sudah ada
+                    DB::table('detail_transaksi')
+                        ->where('id', $detailId)
+                        ->where('transaksi_id', $id)
+                        ->update($detailData);
+                    $updatedDetailIds[] = $detailId;
+                } else {
+                    // Insert detail baru
+                    $detailData['transaksi_id'] = $id;
+                    $detailData['created_at'] = now();
+                    $newDetailId = DB::table('detail_transaksi')->insertGetId($detailData);
+                    $updatedDetailIds[] = $newDetailId;
+                }
+            }
+
+            // Hapus detail yang tidak termasuk dalam update
+            if (!empty($updatedDetailIds)) {
+                DB::table('detail_transaksi')
+                    ->where('transaksi_id', $id)
+                    ->whereNotIn('id', $updatedDetailIds)
+                    ->delete();
+            }
+
+            // Update data transaksi utama
+            DB::table('transaksi')
+                ->where('id', $id)
+                ->update([
+                    'pelanggan_id' => $request->pelanggan_id,
+                    'total_harga' => $totalHarga,
+                    'status_pengerjaan' => $request->status_pengerjaan,
+                    'status_pembayaran' => $request->status_pembayaran,
+                    'status_pengambilan' => $request->status_pengambilan,
+                    'catatan' => $request->catatan,
+                    'updated_at' => now(),
+                ]);
 
             DB::commit();
-            return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil diperbarui!');
+
+            return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil diupdate!');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal update transaksi: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Gagal update transaksi: ' . $e->getMessage());
+            Log::error('Gagal mengupdate transaksi: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Gagal mengupdate transaksi. Terjadi kesalahan pada server. Detail: ' . $e->getMessage())->withInput();
         }
     }
 

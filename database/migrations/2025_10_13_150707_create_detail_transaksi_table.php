@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreignId('layanan_id')->constrained('layanan')->onDelete('cascade');
             $table->foreignId('package_id')->nullable()->constrained('packages')->onDelete('set null'); // opsional
             $table->decimal('berat_cucian', 8, 2)->default(0);
-            $table->decimal('harga_satuan', 10, 2)->default(0);
+            $table->decimal('harga_layanan', 10, 2)->default(0);
+            $table->decimal('harga_paket', 10, 2)->default(0);
             $table->decimal('subtotal', 10, 2)->default(0);
             $table->timestamps();
         });
