@@ -57,10 +57,10 @@
                                                     <span class="badge badge-circle bg-primary me-2">
                                                         <i class="fas fa-concierge-bell"></i>
                                                     </span>
-                                                    {{ $value->nama_paket }}
+                                                    {{ $value->nama_kategori }}
                                                 </div>
                                             </td>
-                                            <td>Rp {{ number_format($value->harga, 0, ',', '.') }}</td>
+                                            <td>Rp {{ number_format($value->harga_kategori, 0, ',', '.') }}</td>
                                             <td>
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <button class="btn btn-info btn-sm btn-rounded" data-bs-toggle="modal"

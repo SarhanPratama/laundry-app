@@ -9,7 +9,7 @@ class KategoriController extends Controller
 {
     public function index()
     {
-    $data = DB::table('packages')->orderBy('id', 'desc')->get();
+    $data = DB::table('kategori')->orderBy('id', 'desc')->get();
     return view('kategori.kategori', compact('data'));
     }
 
@@ -17,12 +17,12 @@ class KategoriController extends Controller
     {
         $request->validate([
             'nama_kategori' => 'required|string|max:100',
-            'harga' => 'required|numeric|min:0',
+            'harga_kategoti' => 'required|numeric|min:0',
             // 'waktu_pengerjaan' => 'required|integer|min:0',
             // 'satuan_waktu' => 'required|in:menit,jam,hari',
         ]);
 
-        DB::table('packages')->insert([
+        DB::table('kategori')->insert([
             'nama_kategori' => $request->nama_paket,
             'harga_kategori' => $request->harga,
             // 'waktu_pengerjaan' => $request->waktu_pengerjaan,
@@ -43,7 +43,7 @@ class KategoriController extends Controller
             // 'satuan_waktu' => 'required|in:menit,jam,hari',
         ]);
 
-        DB::table('packages')->where('id', $id)->update([
+        DB::table('kategori')->where('id', $id)->update([
             'nama_kategori' => $request->nama_paket,
             'harga_kategori' => $request->harga,
             // 'waktu_pengerjaan' => $request->waktu_pengerjaan,
@@ -56,7 +56,7 @@ class KategoriController extends Controller
 
     public function destroy($id)
     {
-        DB::table('packages')->where('id', $id)->delete();
+        DB::table('kategori')->where('id', $id)->delete();
         return redirect()->back()->with('success', 'Data paket berhasil dihapus!');
     }
 

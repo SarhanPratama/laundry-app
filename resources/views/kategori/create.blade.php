@@ -9,12 +9,12 @@
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Nama Paket <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="nama_paket" required placeholder="Contoh: Paket Express">
+                        <label class="form-label">Nama Kategori <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nama_kategori" required placeholder="Contoh: Paket Express">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Harga <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="harga" required placeholder="Contoh: 50000">
+                        <input type="number" class="form-control" name="harga_kategori" required placeholder="Contoh: 50000">
                 </div>
 
                 <div class="modal-footer">
