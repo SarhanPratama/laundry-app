@@ -93,12 +93,12 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label form-label-sm">Kategori Paket</label>
-                                    <select name="items[0][package_id]" class="form-control package-select">
+                                    <select name="items[0][kategori_id]" class="form-control package-select">
                                         <option value="" data-harga="0">-- Pilih Kategori --</option>
                                         @foreach ($paketList as $p)
                                             <option value="{{ $p->id }}"
                                                 data-harga="{{ $p->harga_kategori ?? 0 }}">
-                                                {{ $p->nama_paket }}
+                                                {{ $p->nama_kategori }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -209,11 +209,11 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label form-label-sm">Kategori Paket</label>
-                <select name="items[${newIndex}][package_id]" class="form-control package-select">
+                <select name="items[${newIndex}][kategori_id]" class="form-control package-select">
                     <option value="" data-harga="0">-- Pilih Kategori --</option>
                     @foreach ($paketList as $p)
                         <option value="{{ $p->id }}" data-harga="{{ $p->harga_kategori ?? 0 }}">
-                            {{ $p->nama_paket }}
+                            {{ $p->nama_kategori }}
                         </option>
                     @endforeach
                 </select>

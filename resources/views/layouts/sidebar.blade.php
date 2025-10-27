@@ -25,7 +25,7 @@
                 </a>
             </li>
             <li>
-                <a class="" href="{{ url('package') }}" aria-expanded="false">
+                <a class="" href="{{ url('kategori') }}" aria-expanded="false">
                     <i class="fas fa-box-open"></i>
                     <span class="nav-text">Package</span>
                 </a>

@@ -47,7 +47,7 @@ class TransaksiController extends Controller
         $pelangganList = DB::table('pelanggan')->orderBy('nama_pelanggan')->get();
         $layananList = DB::table('layanan')->orderBy('nama_layanan')->get();
         // dd($layananList);
-        $paketList = DB::table('packages')->orderBy('nama_paket')->get();
+        $paketList = DB::table('kategori')->orderBy('nama_kategori')->get();
         return view('transaksi.transaksi', compact('data', 'pelangganList', 'layananList', 'paketList'));
     }
 
@@ -58,7 +58,7 @@ class TransaksiController extends Controller
             'pelanggan_id' => 'required|exists:pelanggan,id',
             'items' => 'required|array|min:1',
             'items.*.layanan_id' => 'required|exists:layanan,id',
-            'items.*.package_id' => 'nullable|exists:packages,id',
+            'items.*.kategori_id' => 'nullable|exists:kategori,id',
             'items.*.berat_cucian' => 'required|numeric|min:0.1',
             'items.*.subtotal' => 'required|numeric|min:0',
             'items.*.harga_layanan' => 'required|numeric|min:0',
@@ -71,7 +71,7 @@ class TransaksiController extends Controller
 
         try {
             $layananIds = array_column($request->items, 'layanan_id');
-            $packageIds = array_column($request->items, 'package_id');
+            $packageIds = array_column($request->items, 'kategori_id');
             $packageIds = array_filter($packageIds); // Hapus nilai null
 
             // Ambil data layanan dan package dari database
@@ -79,7 +79,7 @@ class TransaksiController extends Controller
 
             $packageData = [];
             if (!empty($packageIds)) {
-                $packageData = DB::table('packages')->whereIn('id', $packageIds)->pluck('harga_kategori', 'id');
+                $packageData = DB::table('kategori')->whereIn('id', $packageIds)->pluck('harga_kategori', 'id');
             }
 
             $totalHarga = 0;
@@ -87,7 +87,7 @@ class TransaksiController extends Controller
 
             foreach ($request->items as $item) {
                 $layananId = $item['layanan_id'];
-                $packageId = $item['package_id'] ?? null;
+                $packageId = $item['kategori_id'] ?? null;
                 $berat = $item['berat_cucian'];
                 $hargaLayananInput = $item['harga_layanan'];
                 $hargaPaketInput = $item['harga_paket'];
@@ -113,7 +113,7 @@ class TransaksiController extends Controller
 
                 $itemsToInsert[] = [
                     'layanan_id' => $layananId,
-                    'package_id' => $packageId,
+                    'kategori_id' => $packageId,
                     'berat_cucian' => $berat,
                     'harga_layanan' => $hargaLayanan, // Simpan harga layanan per kg
                     'harga_paket' => $hargaPaket,     // Simpan harga paket flat
@@ -170,9 +170,9 @@ class TransaksiController extends Controller
 
         $details = DB::table('detail_transaksi')
             ->leftJoin('layanan', 'detail_transaksi.layanan_id', '=', 'layanan.id')
-            ->leftJoin('packages', 'detail_transaksi.package_id', '=', 'packages.id')
+            ->leftJoin('kategori', 'detail_transaksi.kategori_id', '=', 'kategori.id')
             ->where('transaksi_id', $id)
-            ->select('detail_transaksi.*', 'layanan.nama_layanan', 'packages.id as packageId', 'packages.nama_paket')
+            ->select('detail_transaksi.*', 'layanan.nama_layanan', 'kategori.id as packageId', 'kategori.nama_kategori')
             ->get();
         return view('transaksi.show', compact('transaksi', 'details'));
     }
@@ -187,14 +187,14 @@ class TransaksiController extends Controller
 
         $detailItems = DB::table('detail_transaksi')
             ->leftJoin('layanan', 'detail_transaksi.layanan_id', '=', 'layanan.id')
-            ->leftJoin('packages', 'detail_transaksi.package_id', '=', 'packages.id')
-            ->select('detail_transaksi.*', 'layanan.nama_layanan', 'packages.nama_paket')
+            ->leftJoin('kategori', 'detail_transaksi.kategori_id', '=', 'kategori.id')
+            ->select('detail_transaksi.*', 'layanan.nama_layanan', 'kategori.nama_kategori')
             ->where('transaksi_id', $id)
             ->get();
 
         $pelangganList = DB::table('pelanggan')->orderBy('nama_pelanggan')->get();
         $layananList = DB::table('layanan')->orderBy('nama_layanan')->get();
-        $paketList = DB::table('packages')->orderBy('nama_paket')->get();
+        $paketList = DB::table('kategori')->orderBy('nama_kategori')->get();
 
         return view('transaksi.edit', compact('transaksi', 'detailItems', 'pelangganList', 'layananList', 'paketList'));
     }
@@ -206,7 +206,7 @@ class TransaksiController extends Controller
             'pelanggan_id' => 'required|exists:pelanggan,id',
             'items' => 'required|array|min:1',
             'items.*.layanan_id' => 'required|exists:layanan,id',
-            'items.*.package_id' => 'nullable|exists:packages,id',
+            'items.*.kategori_id' => 'nullable|exists:kategori,id',
             'items.*.berat_cucian' => 'required|numeric|min:0.1',
             'items.*.subtotal' => 'required|numeric|min:0',
             'items.*.harga_layanan' => 'required|numeric|min:0',
@@ -228,7 +228,7 @@ class TransaksiController extends Controller
             }
 
             $layananIds = array_column($request->items, 'layanan_id');
-            $packageIds = array_column($request->items, 'package_id');
+            $packageIds = array_column($request->items, 'kategori_id');
             $packageIds = array_filter($packageIds); // Hapus nilai null
 
             // Ambil data layanan dan package dari database untuk validasi
@@ -236,7 +236,7 @@ class TransaksiController extends Controller
 
             $packageData = [];
             if (!empty($packageIds)) {
-                $packageData = DB::table('packages')->whereIn('id', $packageIds)->pluck('harga_kategori', 'id');
+                $packageData = DB::table('kategori')->whereIn('id', $packageIds)->pluck('harga_kategori', 'id');
             }
 
             $totalHarga = 0;
@@ -244,7 +244,7 @@ class TransaksiController extends Controller
 
             foreach ($request->items as $item) {
                 $layananId = $item['layanan_id'];
-                $packageId = $item['package_id'] ?? null;
+                $packageId = $item['kategori_id'] ?? null;
                 $berat = $item['berat_cucian'];
                 $hargaLayananInput = $item['harga_layanan'];
                 $hargaPaketInput = $item['harga_paket'];
@@ -271,7 +271,7 @@ class TransaksiController extends Controller
                 // Data untuk update/insert detail transaksi
                 $detailData = [
                     'layanan_id' => $layananId,
-                    'package_id' => $packageId,
+                    'kategori_id' => $packageId,
                     'berat_cucian' => $berat,
                     'harga_layanan' => $hargaLayanan,
                     'harga_paket' => $hargaPaket,

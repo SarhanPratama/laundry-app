@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('layanan', function (Blueprint $table) {
-            $table->id(); // Kolom No. (auto increment)
-            $table->string('nama_layanan'); // Nama Layanan
-            $table->decimal('harga', 10, 2); // Harga, misal 15000.00
-            $table->timestamps(); // created_at & updated_at
+            $table->id();
+            $table->string('nama_layanan');
+            $table->string('harga');
+            $table->timestamps();
         });
     }
 

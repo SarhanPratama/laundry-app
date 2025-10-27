@@ -161,14 +161,14 @@
                                             {{-- Kategori Paket --}}
                                             <div class="col-md-2">
                                                 <label class="form-label form-label-sm">Kategori Paket</label>
-                                                <select name="items[{{ $index }}][package_id]"
+                                                <select name="items[{{ $index }}][kategori_id]"
                                                     class="form-control form-control-sm package-select">
                                                     <option value="" data-harga="0">-- Pilih Kategori --</option>
                                                     @foreach ($paketList as $p)
                                                         <option value="{{ $p->id }}"
                                                             data-harga="{{ $p->harga_kategori ?? 0 }}"
-                                                            {{ $detail->package_id == $p->id ? 'selected' : '' }}>
-                                                            {{ $p->nama_paket }}
+                                                            {{ $detail->kategori_id == $p->id ? 'selected' : '' }}>
+                                                            {{ $p->nama_kategori }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -299,11 +299,11 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label form-label-sm">Kategori Paket</label>
-                <select name="items[${newIndex}][package_id]" class="form-control form-control-sm package-select">
+                <select name="items[${newIndex}][kategori_id]" class="form-control form-control-sm package-select">
                     <option value="" data-harga="0">-- Pilih Kategori --</option>
                     @foreach ($paketList as $p)
                         <option value="{{ $p->id }}" data-harga="{{ $p->harga_kategori ?? 0 }}">
-                            {{ $p->nama_paket }}
+                            {{ $p->nama_kategori }}
                         </option>
                     @endforeach
                 </select>

@@ -160,9 +160,9 @@
                                             <small class="text-muted">Rp {{ number_format($detail->harga_layanan, 0, ',', '.') }}/kg</small>
                                         </td>
                                         <td>
-                                            @if($detail->nama_paket)
+                                            @if($detail->nama_kategori)
                                                 <span class="badge bg-primary">
-                                                    {{ $detail->nama_paket }}
+                                                    {{ $detail->nama_kategori }}
                                                 </span>
                                                 <br>
                                                 <small class="text-muted">Rp {{ number_format($detail->harga_paket, 0, ',', '.') }}</small>

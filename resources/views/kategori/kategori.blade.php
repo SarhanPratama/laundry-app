@@ -43,6 +43,7 @@
                                     <tr>
                                         <th>No.</th>
                                         <th>Nama Paket</th>
+                                        <th>Harga</th>
                                         <th style="text-align:center;">Aksi
                                         </th>
                                     </tr>
@@ -59,6 +60,7 @@
                                                     {{ $value->nama_paket }}
                                                 </div>
                                             </td>
+                                            <td>Rp {{ number_format($value->harga, 0, ',', '.') }}</td>
                                             <td>
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <button class="btn btn-info btn-sm btn-rounded" data-bs-toggle="modal"
