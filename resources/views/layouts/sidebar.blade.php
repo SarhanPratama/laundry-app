@@ -42,6 +42,12 @@
                     <span class="nav-text">Transaksi</span>
                 </a>
             </li>
+            <li>
+                <a class="" href="{{ url('laporan') }}" aria-expanded="false">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="nav-text">Laporan</span>
+                </a>
+            </li>
 
             {{-- <li><a class="has-arrow " href="javascript:void()" aria-expanded="false">
                     <i class="fas fa-info-circle"></i>
