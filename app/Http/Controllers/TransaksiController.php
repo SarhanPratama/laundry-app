@@ -63,6 +63,7 @@ class TransaksiController extends Controller
                 'transaksi.status_pengambilan',
                 // 'layanan.nama_layanan'
             )
+            ->whereNull('transaksi.deleted_at')
             ->orderBy('transaksi.id', 'desc')
             ->get();
 
@@ -82,21 +83,29 @@ class TransaksiController extends Controller
             'pelanggan_id' => 'required|exists:pelanggan,id',
             'items' => 'required|array|min:1',
             'items.*.layanan_id' => 'required|exists:layanan,id',
-            'items.*.kategori_id' => 'nullable|exists:kategori,id',
+            'items.*.kategori_id' => 'nullable', // Allow null/empty
             'items.*.berat_cucian' => 'required|numeric|min:0.1',
             'items.*.subtotal' => 'required|numeric|min:0',
             'items.*.harga_layanan' => 'required|numeric|min:0',
             'items.*.harga_kategori' => 'required|numeric|min:0',
+            'bayar' => 'required|numeric|min:0',
             'status_pembayaran' => 'required|in:Belum Dibayar,Sudah Dibayar',
             'catatan' => 'nullable|string',
+        ], [
+            'pelanggan_id.required' => 'Pelanggan harus dipilih.',
+            'items.required' => 'Minimal satu item layanan harus diisi.',
+            'bayar.required' => 'Jumlah bayar harus diisi.',
+            'bayar.min' => 'Jumlah bayar tidak boleh negatif.',
         ]);
 
         DB::beginTransaction();
 
         try {
             $layananIds = array_column($request->items, 'layanan_id');
-            $packageIds = array_column($request->items, 'kategori_id');
-            $packageIds = array_filter($packageIds); // Hapus nilai null
+            // Filter out empty values for category IDs
+            $packageIds = array_filter(array_column($request->items, 'kategori_id'), function ($value) {
+                return !empty($value);
+            });
 
             // Ambil data layanan dan package dari database
             $layananData = DB::table('layanan')->whereIn('id', $layananIds)->pluck('harga', 'id');
@@ -111,7 +120,7 @@ class TransaksiController extends Controller
 
             foreach ($request->items as $item) {
                 $layananId = $item['layanan_id'];
-                $packageId = $item['kategori_id'] ?? null;
+                $packageId = !empty($item['kategori_id']) ? $item['kategori_id'] : null;
                 $berat = $item['berat_cucian'];
                 $hargaLayananInput = $item['harga_layanan'];
                 $hargaKategoriInput = $item['harga_kategori'];
@@ -123,7 +132,9 @@ class TransaksiController extends Controller
 
                 // Validasi package jika dipilih
                 if ($packageId && !isset($packageData[$packageId])) {
-                    throw new \Exception("Package dengan ID {$packageId} tidak ditemukan atau tidak valid.");
+                    // Jika kategori ID dikirim tapi tidak ditemukan di DB
+                    // Ini optional, bisa throw error atau ignore.
+                    // throw new \Exception("Kategori dengan ID {$packageId} tidak ditemukan.");
                 }
 
                 // Gunakan harga dari input form (bisa dari data attribute di select option)
@@ -148,11 +159,16 @@ class TransaksiController extends Controller
             }
             $kode_transaksi = $this->generateKodeTransaksi();
             // Simpan data transaksi utama
+            $bayar = $request->bayar;
+            $kembalian = $bayar - $totalHarga;
+
             $transaksiId = DB::table('transaksi')->insertGetId([
                 'pelanggan_id' => $request->pelanggan_id,
                 'kode_transaksi' => $kode_transaksi,
                 'tanggal_transaksi' => now(),
                 'total_harga' => $totalHarga,
+                'bayar' => $bayar,
+                'kembalian' => $kembalian,
                 'status_pengerjaan' => 'Belum Siap',
                 'status_pembayaran' => $request->status_pembayaran,
                 'status_pengambilan' => 'Belum Diambil',
@@ -171,10 +187,13 @@ class TransaksiController extends Controller
             DB::commit();
 
             return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil disimpan!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Gagal menyimpan transaksi: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Gagal menyimpan transaksi. Terjadi kesalahan pada server. Detail: ' . $e->getMessage())->withInput();
+            return redirect()->back()->with('error', 'Gagal menyimpan transaksi: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -185,7 +204,7 @@ class TransaksiController extends Controller
         $transaksi = DB::table('transaksi')
             ->leftJoin('pelanggan', 'transaksi.pelanggan_id', '=', 'pelanggan.id')
             ->leftJoin('detail_transaksi', 'transaksi.id', '=', 'detail_transaksi.transaksi_id')
-            ->select('transaksi.*', 'pelanggan.nama_pelanggan', 'pelanggan.alamat', 'pelanggan.no_telfon', 'pelanggan.alamat', 'detail_transaksi.subtotal')
+            ->select('transaksi.*', 'pelanggan.nama_pelanggan', 'pelanggan.alamat', 'pelanggan.no_telfon', 'pelanggan.alamat', 'detail_transaksi.subtotal', 'transaksi.bayar', 'transaksi.kembalian')
             ->where('transaksi.id', $id)
             ->first();
 
@@ -236,6 +255,7 @@ class TransaksiController extends Controller
             'items.*.subtotal' => 'required|numeric|min:0',
             'items.*.harga_layanan' => 'required|numeric|min:0',
             'items.*.harga_kategori' => 'required|numeric|min:0',
+            'bayar' => 'required|numeric|min:0',
             'status_pengerjaan' => 'required|in:Belum Siap,Sudah Siap',
             'status_pembayaran' => 'required|in:Belum Dibayar,Sudah Dibayar',
             'status_pengambilan' => 'required|in:Belum Diambil,Sudah Diambil',
@@ -253,8 +273,10 @@ class TransaksiController extends Controller
             }
 
             $layananIds = array_column($request->items, 'layanan_id');
-            $packageIds = array_column($request->items, 'kategori_id');
-            $packageIds = array_filter($packageIds); // Hapus nilai null
+            // Filter out empty values for category IDs
+            $packageIds = array_filter(array_column($request->items, 'kategori_id'), function ($value) {
+                return !empty($value);
+            });
 
             // Ambil data layanan dan package dari database untuk validasi
             $layananData = DB::table('layanan')->whereIn('id', $layananIds)->pluck('harga', 'id');
@@ -269,7 +291,7 @@ class TransaksiController extends Controller
 
             foreach ($request->items as $item) {
                 $layananId = $item['layanan_id'];
-                $packageId = $item['kategori_id'] ?? null;
+                $packageId = !empty($item['kategori_id']) ? $item['kategori_id'] : null;
                 $berat = $item['berat_cucian'];
                 $hargaLayananInput = $item['harga_layanan'];
                 $hargaKategoriInput = $item['harga_kategori'];
@@ -282,7 +304,7 @@ class TransaksiController extends Controller
 
                 // Validasi package jika dipilih
                 if ($packageId && !isset($packageData[$packageId])) {
-                    throw new \Exception("Package dengan ID {$packageId} tidak ditemukan atau tidak valid.");
+                    // throw new \Exception("Package dengan ID {$packageId} tidak ditemukan atau tidak valid.");
                 }
 
                 // Gunakan harga dari input form
@@ -293,11 +315,9 @@ class TransaksiController extends Controller
                 $subtotal = ($hargaLayanan * $berat) + $hargakategori;
                 $totalHarga += $subtotal;
 
-                $kode_transaksi = $this->generateKodeTransaksi();
                 // Data untuk update/insert detail transaksi
                 $detailData = [
                     'layanan_id' => $layananId,
-                    'kode_transaksi' => $kode_transaksi,
                     'kategori_id' => $packageId,
                     'berat_cucian' => $berat,
                     'harga_layanan' => $hargaLayanan,
@@ -330,12 +350,17 @@ class TransaksiController extends Controller
                     ->delete();
             }
 
+            $bayar = $request->bayar;
+            $kembalian = $bayar - $totalHarga;
+
             // Update data transaksi utama
             DB::table('transaksi')
                 ->where('id', $id)
                 ->update([
                     'pelanggan_id' => $request->pelanggan_id,
                     'total_harga' => $totalHarga,
+                    'bayar' => $bayar,
+                    'kembalian' => $kembalian,
                     'status_pengerjaan' => $request->status_pengerjaan,
                     'status_pembayaran' => $request->status_pembayaran,
                     'status_pengambilan' => $request->status_pengambilan,
@@ -346,15 +371,18 @@ class TransaksiController extends Controller
             DB::commit();
 
             return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil diupdate!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Gagal mengupdate transaksi: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Gagal mengupdate transaksi. Terjadi kesalahan pada server. Detail: ' . $e->getMessage())->withInput();
+            return redirect()->back()->with('error', 'Gagal mengupdate transaksi: ' . $e->getMessage())->withInput();
         }
     }
 
 
-    // ✅ Hapus data transaksi
+    // ✅ Hapus data transaksi (Soft Delete)
     public function destroy($id)
     {
         try {
@@ -362,10 +390,12 @@ class TransaksiController extends Controller
             if (!$transaksi) {
                 return redirect()->back()->with('error', 'Transaksi tidak ditemukan!');
             }
-            // Hapus detail transaksi terlebih dahulu
-            DB::table('detail_transaksi')->where('transaksi_id', $id)->delete();
-            // Hapus transaksi utama
-            DB::table('transaksi')->where('id', $id)->delete();
+
+            // Soft delete transaksi utama
+            DB::table('transaksi')
+                ->where('id', $id)
+                ->update(['deleted_at' => now()]);
+
             return redirect()->back()->with('success', 'Transaksi berhasil dihapus!');
         } catch (\Exception $e) {
             Log::error('Gagal menghapus transaksi: ' . $e->getMessage());

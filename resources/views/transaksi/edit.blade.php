@@ -235,13 +235,13 @@
                                                 </h5>
                                                 <input type="hidden" id="total-keseluruhan-raw" value="{{ $transaksi->total_harga }}">
                                             </div>
-                                            
+
                                             <div class="mb-3">
                                                 <label for="bayar" class="form-label fw-semibold small">Jumlah Bayar (Rp)</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-white">Rp</span>
-                                                    <input type="number" class="form-control" id="bayar" name="bayar" 
-                                                        placeholder="0" min="0" 
+                                                    <input type="number" class="form-control" id="bayar" name="bayar"
+                                                        placeholder="0" min="0"
                                                         value="{{ $transaksi->status_pembayaran == 'Sudah Dibayar' ? $transaksi->total_harga : '' }}">
                                                 </div>
                                             </div>
@@ -511,11 +511,11 @@
                 // Update tampilan total keseluruhan
                 document.getElementById('total-keseluruhan').textContent = formatRupiah(totalKeseluruhan);
                 document.getElementById('total-keseluruhan-raw').value = totalKeseluruhan;
-                
+
                 // Hitung ulang kembalian jika total berubah
                 calculateKembalian();
             }
-            
+
             // Fungsi Hitung Kembalian
             const bayarInput = document.getElementById('bayar');
             const kembalianDisplay = document.getElementById('kembalian');
@@ -525,7 +525,7 @@
             function calculateKembalian() {
                 const total = parseFloat(document.getElementById('total-keseluruhan-raw').value) || 0;
                 const bayar = parseFloat(bayarInput.value) || 0;
-                
+
                 // Hitung kembalian
                 let kembalian = 0;
                 if (bayar >= total) {
@@ -544,7 +544,7 @@
 
                 kembalianDisplay.textContent = formatRupiah(kembalian);
             }
-            
+
             // Initial calculation for kembalian if value exists
             if (bayarInput.value) {
                 calculateKembalian();

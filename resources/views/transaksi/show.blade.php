@@ -249,66 +249,15 @@
                                         <span class="fw-bold fs-3">Rp
                                             {{ number_format($transaksi->total_harga, 0, ',', '.') }}</span>
                                     </div>
+                                    <div class="card-footer bg-white text-dark d-flex justify-content-between">
+                                        <div class="fw-bold">Bayar: <span class="text-success">Rp
+                                                {{ number_format($transaksi->bayar, 0, ',', '.') }}</span></div>
+                                        <div class="fw-bold">Kembalian: <span class="text-secondary">Rp
+                                                {{ number_format($transaksi->kembalian, 0, ',', '.') }}</span></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Payment Section -->
-                        <div class="payment-section mt-4">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-header bg-success text-white py-3">
-                                    <h5 class="mb-0"><i class="fas fa-cash-register me-2"></i>Pembayaran</h5>
-                                </div>
-
-                                <div class="card-body">
-
-                                    <!-- Total Harga -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Total Harga</label>
-                                        <input type="text" class="form-control" id="total_harga_display"
-                                            value="Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}" readonly>
-
-                                        <input type="hidden" id="total_harga" value="{{ $transaksi->total_harga }}">
-                                    </div>
-
-                                    <!-- Jumlah Bayar -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Jumlah Bayar</label>
-                                        <input type="number" class="form-control" id="jumlah_bayar"
-                                            placeholder="Masukkan jumlah bayar...">
-                                    </div>
-
-                                    <!-- Kembalian -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Kembalian</label>
-                                        <input type="text" class="form-control bg-light" id="kembalian" readonly>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Script Hitung Kembalian -->
-                        <script>
-                            function formatRupiah(angka) {
-                                if (isNaN(angka)) return "Rp 0";
-                                return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                            }
-
-                            document.getElementById('jumlah_bayar').addEventListener('input', function () {
-
-                                let total = parseFloat(document.getElementById('total_harga').value);
-                                let bayar = parseFloat(this.value);
-
-                                if (!isNaN(bayar)) {
-                                    let kembalian = bayar - total;
-                                    document.getElementById('kembalian').value =
-                                        kembalian >= 0 ? formatRupiah(kembalian) : "Rp 0";
-                                } else {
-                                    document.getElementById('kembalian').value = "Rp 0";
-                                }
-                            });
-                        </script>
-
 
                         <!-- Notes Section -->
                         @if ($transaksi->catatan)
