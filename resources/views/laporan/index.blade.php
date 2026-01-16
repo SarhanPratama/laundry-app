@@ -137,7 +137,7 @@
                                     <thead class="table-primary">
                                         <tr>
                                             <th>No</th>
-                                            <th>ID Transaksi</th>
+                                            <th>Kode Transaksi</th>
                                             <th>Tanggal & Waktu</th>
                                             <th>Pelanggan</th>
                                             <th>No. Telepon</th>
@@ -152,22 +152,24 @@
                                         @forelse($data as $item)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td><strong>#{{ str_pad($item->id, 5, '0', STR_PAD_LEFT) }}</strong></td>
+                                                <td><strong>#{{ $item->kode_transaksi }}</strong></td>
                                                 <td>{{ \Carbon\Carbon::parse($item->tanggal_transaksi)->format('d/m/Y H:i') }}</td>
                                                 <td>{{ $item->nama_pelanggan }}</td>
                                                 <td>{{ $item->no_telfon }}</td>
                                                 <td><strong>Rp {{ number_format($item->total_harga, 0, ',', '.') }}</strong></td>
                                                 <td>
-                                                    <span
-                                                        class="badge badge-{{ $item->status_pembayaran == 'Sudah Dibayar' ? 'success' : 'warning' }}">
+                                                    @if($item->deleted_at)
+                                                         <span class="badge badge-danger">Dibatalkan</span>
+                                                    @else
                                                         {{ $item->status_pembayaran }}
-                                                    </span>
+                                                    @endif
                                                 </td>
                                                 <td>
-                                                    <span
-                                                        class="badge badge-{{ $item->status_pengerjaan == 'Sudah Siap' ? 'success' : 'secondary' }}">
+                                                    @if($item->deleted_at)
+                                                         <span class="badge badge-danger">Dibatalkan</span>
+                                                    @else
                                                         {{ $item->status_pengerjaan }}
-                                                    </span>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <span

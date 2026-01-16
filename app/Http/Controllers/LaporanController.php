@@ -25,9 +25,11 @@ class LaporanController extends Controller
     public function filter(Request $request)
     {
         $query = DB::table('transaksi')
+            // ->whereNull('transaksi.deleted_at') // Soft deletes tidak diabaikan untuk laporan agar include yang dibatalkan
             ->join('pelanggan', 'transaksi.pelanggan_id', '=', 'pelanggan.id')
             ->select(
                 'transaksi.id',
+                'transaksi.kode_transaksi',
                 'transaksi.tanggal_transaksi',
                 'pelanggan.nama_pelanggan',
                 'pelanggan.no_telfon',
@@ -35,7 +37,8 @@ class LaporanController extends Controller
                 'transaksi.status_pembayaran',
                 'transaksi.status_pengerjaan',
                 'transaksi.status_pengambilan',
-                'transaksi.catatan'
+                'transaksi.catatan',
+                'transaksi.deleted_at'
             );
 
         // Filter tanggal dari
@@ -101,13 +104,15 @@ class LaporanController extends Controller
             ->join('pelanggan', 'transaksi.pelanggan_id', '=', 'pelanggan.id')
             ->select(
                 'transaksi.id',
+                'transaksi.kode_transaksi',
                 'transaksi.tanggal_transaksi',
                 'pelanggan.nama_pelanggan',
                 'pelanggan.no_telfon',
                 'transaksi.total_harga',
                 'transaksi.status_pembayaran',
                 'transaksi.status_pengerjaan',
-                'transaksi.status_pengambilan'
+                'transaksi.status_pengambilan',
+                'transaksi.deleted_at'
             );
 
         // Terapkan filter yang sama
@@ -148,11 +153,9 @@ class LaporanController extends Controller
                 ->get();
         }
 
-        // Statistik
-        $totalPendapatan = $data->where('status_pembayaran', 'Sudah Dibayar')->sum('total_harga');
-        $totalBelumBayar = $data->where('status_pembayaran', 'Belum Dibayar')->sum('total_harga');
-        $totalKeseluruhan = $data->sum('total_harga');
-
+        $totalPendapatan = $data->whereNull('deleted_at')->where('status_pembayaran', 'Sudah Dibayar')->sum('total_harga');
+        $totalBelumBayar = $data->whereNull('deleted_at')->where('status_pembayaran', 'Belum Dibayar')->sum('total_harga');
+        $totalKeseluruhan = $data->whereNull('deleted_at')->sum('total_harga'); // Hanya yang tidak dihapus
 
         $pdf = Pdf::loadView('laporan.pdf.periodik', compact(
             'data',
@@ -173,16 +176,19 @@ class LaporanController extends Controller
         $today = Carbon::today();
 
         $data = DB::table('transaksi')
+            // ->whereNull('transaksi.deleted_at') // Include juga yang sudah dihapus untuk laporan lengkap
             ->join('pelanggan', 'transaksi.pelanggan_id', '=', 'pelanggan.id')
             ->select(
                 'transaksi.id',
+                'transaksi.kode_transaksi',
                 'transaksi.tanggal_transaksi',
                 'pelanggan.nama_pelanggan',
                 'pelanggan.no_telfon',
                 'transaksi.total_harga',
                 'transaksi.status_pembayaran',
                 'transaksi.status_pengerjaan',
-                'transaksi.status_pengambilan'
+                'transaksi.status_pengambilan',
+                'transaksi.deleted_at'
             )
             ->whereDate('transaksi.tanggal_transaksi', $today)
             ->orderBy('transaksi.tanggal_transaksi', 'desc')
@@ -204,9 +210,9 @@ class LaporanController extends Controller
                 ->get();
         }
 
-        $totalPendapatan = $data->where('status_pembayaran', 'Sudah Dibayar')->sum('total_harga');
-        $totalBelumBayar = $data->where('status_pembayaran', 'Belum Dibayar')->sum('total_harga');
-        $totalKeseluruhan = $data->sum('total_harga');
+        $totalPendapatan = $data->whereNull('deleted_at')->where('status_pembayaran', 'Sudah Dibayar')->sum('total_harga');
+        $totalBelumBayar = $data->whereNull('deleted_at')->where('status_pembayaran', 'Belum Dibayar')->sum('total_harga');
+        $totalKeseluruhan = $data->whereNull('deleted_at')->sum('total_harga'); // Hanya yang tidak dihapus
 
         $pdf = Pdf::loadView('laporan.pdf.harian', compact(
             'data',
