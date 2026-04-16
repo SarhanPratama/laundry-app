@@ -15,6 +15,7 @@
                     <div class="mb-3">
                         <label class="form-label">Harga <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" name="harga_kategori" required placeholder="Contoh: 50000">
+                    </div>
                 </div>
 
                 <div class="modal-footer">
