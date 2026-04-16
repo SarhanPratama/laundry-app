@@ -797,7 +797,7 @@
 
             {{-- Role --}}
             <span class="fw-semibold text-capitalize">
-                {{ auth()->user()->role === 'owner' ? 'Admin' : auth()->user()->role }}
+                {{ auth()->user()->role}}
             </span>
 
             {{-- Arrow --}}
