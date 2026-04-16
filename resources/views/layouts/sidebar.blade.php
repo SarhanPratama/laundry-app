@@ -18,7 +18,7 @@
 
             </li>
 
-            @if (auth()->user()->role == 'owner')
+            @if (auth()->user()->role == 'admin')
                 <li>
                     <a class="" href="{{ route('layanan.index') }}" aria-expanded="false">
                         <i class="fas fa-concierge-bell"></i>
@@ -31,20 +31,20 @@
                         <span class="nav-text">Kategori</span>
                     </a>
                 </li>
-            @endif
 
-            <li>
-                <a class="" href="{{ route('pelanggan.index') }}" aria-expanded="false">
-                    <i class="fas fa-users"></i>
-                    <span class="nav-text">Pelanggan</span>
-                </a>
-            </li>
-            <li>
-                <a class="" href="{{ route('transaksi.index') }}" aria-expanded="false">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span class="nav-text">Transaksi</span>
-                </a>
-            </li>
+                <li>
+                    <a class="" href="{{ route('pelanggan.index') }}" aria-expanded="false">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Pelanggan</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="" href="{{ route('transaksi.index') }}" aria-expanded="false">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span class="nav-text">Transaksi</span>
+                    </a>
+                </li>
+            @endif
 
             @if (auth()->user()->role == 'owner' || auth()->user()->role == 'admin')
                 <li>
