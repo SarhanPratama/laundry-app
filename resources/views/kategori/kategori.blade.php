@@ -76,26 +76,6 @@
                                                     </button>
                                                 </div>
                                             </td>
-
-                                            {{-- <td>
-                                                <div class="d-flex justify-content-center gap-2">
-                                                    <button class="btn btn-info btn-sm btn-rounded" data-bs-toggle="modal"
-                                                        data-bs-target="#modalEdit{{ $value->id }}">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </button>
-                                                    <form action="{{ url('layanan/' . $value->id) }}" method="POST"
-                                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus layanan ini?')"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm btn-rounded"
-                                                            title="Hapus">
-                                                            <i class="fas fa-trash-alt"></i> Hapus
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td> --}}
-                                            @include('kategori.edit')
                                         </tr>
                                     @empty
                                         <tr>
@@ -113,6 +93,11 @@
             </div>
         </div>
     </div>
+
+    {{-- Render semua Edit Modal --}}
+    @foreach ($data as $value)
+        @include('kategori.edit')
+    @endforeach
 
     <!-- Modal Tambah -->
     @include('kategori.create')

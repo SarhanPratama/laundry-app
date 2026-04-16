@@ -29,9 +29,13 @@
         if (deleteModal) {
             deleteModal.addEventListener('show.bs.modal', function (event) {
                 var button = event.relatedTarget;
-                var url = button.getAttribute('data-url');
-                var form = document.getElementById('deleteForm');
-                form.action = url;
+                if (button) {
+                    var url = button.getAttribute('data-url');
+                    var form = document.getElementById('deleteForm');
+                    if (form && url) {
+                        form.action = url;
+                    }
+                }
             });
         }
     });
