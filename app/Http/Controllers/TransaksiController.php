@@ -377,6 +377,12 @@ class TransaksiController extends Controller
             $bayar = $request->bayar ?? 0;
             $kembalian = $bayar - $totalHarga;
 
+            // Auto-update status pembayaran dari DP ke Sudah Dibayar jika sudah terbayar penuh
+            $statusPembayaran = $request->status_pembayaran;
+            if ($transaksi->status_pembayaran === 'DP' && $bayar >= $totalHarga) {
+                $statusPembayaran = 'Sudah Dibayar';
+            }
+
             // Update data transaksi utama
             DB::table('transaksi')
                 ->where('id', $id)
@@ -386,7 +392,7 @@ class TransaksiController extends Controller
                     'bayar' => $bayar,
                     'kembalian' => $kembalian,
                     'status_pengerjaan' => $request->status_pengerjaan,
-                    'status_pembayaran' => $request->status_pembayaran,
+                    'status_pembayaran' => $statusPembayaran,
                     'status_pengambilan' => $request->status_pengambilan,
                     'catatan' => $request->catatan,
                     'updated_at' => now(),

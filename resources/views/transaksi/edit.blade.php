@@ -232,7 +232,7 @@
 
                             {{-- Ringkasan Perhitungan --}}
                             <div class="row mt-4">
-                                <div class="col-md-4 offset-md-8">
+                                <div class="col-md-6 offset-md-6">
                                     <div class="card border-0 bg-light shadow-sm">
                                         <div class="card-body">
                                             <div class="mb-3 d-flex justify-content-between align-items-center">
@@ -244,25 +244,74 @@
                                                     value="{{ $transaksi->total_harga }}">
                                             </div>
                                             @if ($transaksi->status_pembayaran == 'Sudah Dibayar')
-                                                <p>Transaksi sudah dibayar</p>
+                                                <div class="alert alert-success mb-0" role="alert">
+                                                    <i class="fas fa-check-circle me-2"></i>
+                                                    <strong>Transaksi Sudah Lunas</strong>
+                                                    <small class="d-block mt-2">
+                                                        Total Bayar: <strong>Rp {{ number_format($transaksi->bayar, 0, ',', '.') }}</strong>
+                                                    </small>
+                                                </div>
+                                            @elseif ($transaksi->status_pembayaran == 'DP')
+                                                <!-- Info DP Sebelumnya -->
+                                                <div class="alert alert-info mb-3" role="alert">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Riwayat Pembayaran DP</strong>
+                                                    <div class="mt-2 small">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>Sudah Dibayar (DP):</span>
+                                                            <strong class="text-primary">Rp {{ number_format($transaksi->bayar, 0, ',', '.') }}</strong>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between border-top pt-2">
+                                                            <span class="fw-bold">Sisa Yang Harus Dibayar:</span>
+                                                            <strong class="text-danger fs-6">Rp {{ number_format($transaksi->total_harga - $transaksi->bayar, 0, ',', '.') }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Form Input Pembayaran Lanjutan -->
+                                                <div class="mb-3">
+                                                    <label for="bayar" class="form-label fw-semibold small">
+                                                        <i class="fas fa-money-bill-wave me-1"></i>Tambah Pembayaran (Rp)
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-white">Rp</span>
+                                                        <input type="number" class="form-control" id="bayar"
+                                                            name="bayar" placeholder="0" min="0" step="1000"
+                                                            value="{{ intval($transaksi->bayar) }}"
+                                                            data-total="{{ intval($transaksi->total_harga) }}"
+                                                            data-existing="{{ intval($transaksi->bayar) }}"
+                                                            data-status-pembayaran="DP">
+                                                        <span class="input-group-text bg-white small text-muted">(Total akan ditambah ke DP sebelumnya)</span>
+                                                    </div>
+                                                    <small class="text-muted d-block mt-1">
+                                                        <i class="fas fa-lightbulb me-1"></i>
+                                                        Masukkan total pembayaran yang ingin diberikan (DP lama + pembayaran baru)
+                                                    </small>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                                    <span class="fw-bold">Kembalian</span>
+                                                    <h5 class="fw-bold text-success mb-0" id="kembalian">Rp 0</h5>
+                                                </div>
                                             @else
+                                                <!-- Status Belum Dibayar -->
                                                 <div class="mb-3">
                                                     <label for="bayar" class="form-label fw-semibold small">Jumlah
                                                         Bayar (Rp)</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-white">Rp</span>
                                                         <input type="number" class="form-control" id="bayar"
-                                                            name="bayar" placeholder="0" min="0"
-                                                            value="{{ $transaksi->status_pembayaran == 'Sudah Dibayar' ? intval($transaksi->bayar) : '' }}">
+                                                            name="bayar" placeholder="0" min="0" step="1000"
+                                                            value="0"
+                                                            data-total="{{ intval($transaksi->total_harga) }}"
+                                                            data-status-pembayaran="Belum Dibayar">
                                                     </div>
                                                 </div>
 
                                                 <div
                                                     class="d-flex justify-content-between align-items-center pt-2 border-top">
                                                     <span class="fw-bold">Kembalian</span>
-                                                    <h5 class="fw-bold text-success mb-0" id="kembalian">Rp
-                                                        {{ $transaksi->status_pembayaran == 'Sudah Dibayar' ? intval($transaksi->kembalian) : 0 }}
-                                                    </h5>
+                                                    <h5 class="fw-bold text-success mb-0" id="kembalian">Rp 0</h5>
                                                 </div>
                                             @endif
                                         </div>
@@ -563,6 +612,7 @@
             // Fungsi Hitung Kembalian
             const bayarInput = document.getElementById('bayar');
             const kembalianDisplay = document.getElementById('kembalian');
+            const statusPembayaranSelect = document.querySelector('select[name="status_pembayaran"]');
 
             function calculateKembalian() {
                 if (!bayarInput || !kembalianDisplay) {
@@ -571,23 +621,86 @@
 
                 const total = parseFloat(document.getElementById('total-keseluruhan-raw').value) || 0;
                 const bayar = parseFloat(bayarInput.value) || 0;
+                const existingPayment = parseFloat(bayarInput.dataset.existing) || 0;
+                const statusPembayaran = bayarInput.dataset.statusPembayaran || '';
 
                 let kembalian = 0;
-                if (bayar >= total) {
-                    kembalian = bayar - total;
-                    kembalianDisplay.classList.remove('text-danger');
-                    kembalianDisplay.classList.add('text-success');
-                } else if (bayar > 0) {
-                    kembalian = bayar - total;
-                    kembalianDisplay.classList.remove('text-success');
-                    kembalianDisplay.classList.add('text-danger');
+
+                // Jika status DP, bayar adalah total pembayaran (DP lama + baru)
+                if (statusPembayaran === 'DP') {
+                    if (bayar >= total) {
+                        kembalian = bayar - total;
+                        kembalianDisplay.classList.remove('text-danger', 'text-warning');
+                        kembalianDisplay.classList.add('text-success');
+
+                        // Auto-update status pembayaran ke Sudah Dibayar
+                        if (statusPembayaranSelect && statusPembayaranSelect.value !== 'Sudah Dibayar') {
+                            statusPembayaranSelect.value = 'Sudah Dibayar';
+                            // Update data attribute untuk consistency
+                            bayarInput.dataset.statusPembayaran = 'Sudah Dibayar';
+
+                            // Tampilkan notifikasi ke user
+                            showAutoUpdateNotification();
+                        }
+                    } else if (bayar > existingPayment) {
+                        kembalian = bayar - total;
+                        kembalianDisplay.classList.remove('text-success');
+                        kembalianDisplay.classList.add('text-warning');
+
+                        // Reset status ke DP jika kurang
+                        if (statusPembayaranSelect && statusPembayaranSelect.value === 'Sudah Dibayar') {
+                            statusPembayaranSelect.value = 'DP';
+                            bayarInput.dataset.statusPembayaran = 'DP';
+                        }
+                    } else {
+                        kembalian = 0;
+                        kembalianDisplay.classList.remove('text-danger', 'text-warning');
+                        kembalianDisplay.classList.add('text-success');
+                    }
                 } else {
-                    kembalian = 0;
-                    kembalianDisplay.classList.remove('text-danger');
-                    kembalianDisplay.classList.add('text-success');
+                    // Status Belum Dibayar atau Sudah Dibayar
+                    if (bayar >= total) {
+                        kembalian = bayar - total;
+                        kembalianDisplay.classList.remove('text-danger');
+                        kembalianDisplay.classList.add('text-success');
+                    } else if (bayar > 0) {
+                        kembalian = bayar - total;
+                        kembalianDisplay.classList.remove('text-success');
+                        kembalianDisplay.classList.add('text-danger');
+                    } else {
+                        kembalian = 0;
+                        kembalianDisplay.classList.remove('text-danger');
+                        kembalianDisplay.classList.add('text-success');
+                    }
                 }
 
                 kembalianDisplay.textContent = formatRupiah(kembalian);
+            }
+
+            // Fungsi untuk tampilkan notifikasi auto-update
+            function showAutoUpdateNotification() {
+                // Cek apakah notifikasi sudah ada
+                let notification = document.querySelector('.auto-update-notification');
+                if (!notification) {
+                    notification = document.createElement('div');
+                    notification.className = 'alert alert-success alert-dismissible fade show auto-update-notification mt-3';
+                    notification.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Status Pembaruan Otomatis!</strong> Status pembayaran telah diubah menjadi "Sudah Dibayar" karena pembayaran sudah mencukupi.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    const cardBody = document.querySelector('.card-body');
+                    if (cardBody) {
+                        cardBody.insertBefore(notification, cardBody.firstChild);
+                    }
+
+                    // Auto-dismiss setelah 5 detik
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 5000);
+                }
             }
 
             if (bayarInput && kembalianDisplay) {
