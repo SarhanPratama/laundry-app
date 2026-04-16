@@ -34,14 +34,14 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            // 'role' => 'required|in:owner,kasir',
+            'role' => 'required|in:kasir,admin,owner',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'role' => 'kasir',
+            'role' => $request->role,
             'password' => Hash::make($request->password),
         ]);
 
@@ -64,14 +64,14 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            // 'role' => 'required|in:owner,kasir',
+            'role' => 'required|in:kasir,admin,owner',
             'password' => 'nullable|string|min:6|confirmed',
         ]);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => 'kasir',
+            'role' => $request->role,
         ];
 
         if ($request->filled('password')) {
